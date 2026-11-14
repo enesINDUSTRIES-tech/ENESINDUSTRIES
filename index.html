@@ -1,1630 +1,203 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KATALOG JERSEY - Pusat Pesanan & Katalog Jersey Profesional</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        navy: {
-                            600: '#1e3a8a',
-                            700: '#1e293b',
-                            800: '#0f172a',
-                            900: '#090d16',
-                        },
-                        orange: {
-                            500: '#f97316',
-                            600: '#ea580c',
-                            700: '#c2410c',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Font Inter & FontAwesome Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
-
-    <!-- Top Notification Banner -->
-    <div class="bg-navy-900 text-white text-xs sm:text-sm py-2 px-4 text-center font-medium">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <span class="flex items-center gap-2"><i class="fa-solid fa-bolt text-orange-500"></i> PROMO JERSEY CUSTOM - Harga Mulai Rp135.000 / PCS & DP Otomatis!</span>
-            <span class="hidden md:inline-flex items-center gap-4">
-                <a href="https://wa.me/6285126260240" target="_blank" class="hover:text-orange-400 transition"><i class="fa-brands fa-whatsapp text-green-400"></i> 0851-2626-0240</a>
-            </span>
-        </div>
-    </div>
-
-    <!-- Navigation Bar -->
-    <nav class="bg-navy-800 text-white sticky top-0 z-50 shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('beranda')">
-                    <div class="bg-orange-500 text-white p-2 rounded-xl font-black text-xl tracking-wider shadow-lg flex items-center justify-center w-10 h-10">
-                        <i class="fa-solid fa-shirt"></i>
-                    </div>
-                    <div>
-                        <span class="font-extrabold text-lg sm:text-xl tracking-tight text-white">KATALOG<span class="text-orange-500 ml-1">JERSEY</span></span>
-                        <p class="text-[10px] text-slate-400 tracking-widest uppercase">Official Store & Vendor</p>
-                    </div>
-                </div>
-
-                <!-- Desktop Menu -->
-                <div class="hidden lg:flex items-center space-x-1 font-medium text-sm">
-                    <button onclick="switchTab('beranda')" class="nav-btn px-3 py-2 rounded-lg transition hover:bg-navy-700 active-tab" data-tab="beranda"><i class="fa-solid fa-house mr-1.5"></i> Beranda</button>
-                    <button onclick="switchTab('katalog')" class="nav-btn px-3 py-2 rounded-lg transition hover:bg-navy-700" data-tab="katalog"><i class="fa-solid fa-shirt mr-1.5"></i> Katalog</button>
-                    <button onclick="switchTab('kategori')" class="nav-btn px-3 py-2 rounded-lg transition hover:bg-navy-700" data-tab="kategori"><i class="fa-solid fa-list mr-1.5"></i> Kategori</button>
-                    <button onclick="switchTab('riwayat')" class="nav-btn px-3 py-2 rounded-lg transition hover:bg-navy-700" data-tab="riwayat"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Pesanan Saya</button>
-                    <button onclick="switchTab('admin')" class="nav-btn px-3 py-2 rounded-lg transition hover:bg-navy-700 text-orange-400" data-tab="admin"><i class="fa-solid fa-shield-halved mr-1.5"></i> Admin</button>
-                </div>
-
-                <!-- Right Actions -->
-                <div class="flex items-center gap-3">
-                    <button onclick="switchTab('keranjang')" class="relative bg-navy-700 hover:bg-navy-600 p-2.5 rounded-xl transition flex items-center gap-2 border border-slate-700">
-                        <i class="fa-solid fa-cart-shopping text-orange-500 text-lg"></i>
-                        <span class="hidden sm:inline text-xs font-semibold">Keranjang</span>
-                        <span id="cart-badge" class="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow">0</span>
-                    </button>
-                    <button onclick="toggleMobileMenu()" class="lg:hidden text-white p-2 rounded-lg hover:bg-navy-700">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Mobile Menu Dropdown -->
-        <div id="mobile-menu" class="hidden lg:hidden bg-navy-900 border-t border-slate-800 px-4 pt-2 pb-4 space-y-1">
-            <button onclick="switchTab('beranda'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-navy-800"><i class="fa-solid fa-house mr-2 text-orange-500"></i> Beranda</button>
-            <button onclick="switchTab('katalog'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-navy-800"><i class="fa-solid fa-shirt mr-2 text-orange-500"></i> Katalog Jersey</button>
-            <button onclick="switchTab('kategori'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-navy-800"><i class="fa-solid fa-list mr-2 text-orange-500"></i> Kategori Produk</button>
-            <button onclick="switchTab('riwayat'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-navy-800"><i class="fa-solid fa-clock-rotate-left mr-2 text-orange-500"></i> Pesanan Saya</button>
-            <button onclick="switchTab('admin'); toggleMobileMenu()" class="block w-full text-left px-3 py-2 rounded-lg hover:bg-navy-800 text-orange-400"><i class="fa-solid fa-shield-halved mr-2"></i> Dashboard Admin</button>
-        </div>
-    </nav>
-
-    <!-- Main Container -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- TAB 1: BERANDA -->
-        <section id="tab-beranda" class="tab-content space-y-10">
-            <!-- Hero Banner -->
-            <div class="relative bg-gradient-to-r from-navy-900 via-navy-800 to-indigo-950 rounded-3xl overflow-hidden shadow-2xl text-white p-6 sm:p-12 lg:p-16 flex flex-col md:flex-row items-center justify-between">
-                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]"></div>
-                <div class="relative z-10 max-w-2xl space-y-6 text-center md:text-left">
-                    <span class="inline-flex items-center gap-2 bg-orange-500/20 text-orange-400 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border border-orange-500/30">
-                        <i class="fa-solid fa-star"></i> Vendor Jersey Custom No. 1
-                    </span>
-                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-                        PUSAT PEMBUATAN & KATALOG <span class="text-orange-500">JERSEY PREMIUM</span>
-                    </h1>
-                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-                        Wujudkan jersey tim impianmu dengan bahan Dryfit premium, cetak sublimasi anti luntur, dan jahitan rapi standar distro. Harga seragam spesial <strong class="text-white">Rp135.000 / PCS</strong> dengan simulasi DP otomatis!
-                    </p>
-                    <div class="flex flex-wrap justify-center md:justify-start gap-4 pt-2">
-                        <button onclick="switchTab('katalog')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-7 py-3.5 rounded-2xl shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                            <i class="fa-solid fa-shirt"></i> Lihat Katalog Jersey
-                        </button>
-                        <a href="https://wa.me/6285126260240?text=Halo%20Admin%2C%20saya%20ingin%20berkonsultasi%20pemesanan%20jersey." target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-7 py-3.5 rounded-2xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                            <i class="fa-brands fa-whatsapp text-lg"></i> Chat Admin WA
-                        </a>
-                    </div>
-                </div>
-                <div class="relative z-10 mt-8 md:mt-0">
-                    <div class="w-64 sm:w-80 h-64 sm:h-80 bg-gradient-to-tr from-orange-500 to-amber-400 rounded-3xl rotate-3 shadow-2xl flex items-center justify-center p-2 relative">
-                        <img id="hero-banner-img" src="https://images.unsplash.com/photo-1518063319789-7217e6adc0cc?auto=format&fit=crop&w=600&q=80" alt="Jersey Banner" class="w-full h-full object-cover rounded-2xl -rotate-3 shadow-inner">
-                        <div class="absolute bottom-4 left-4 bg-navy-900/90 backdrop-blur text-white px-4 py-2 rounded-xl shadow-lg text-xs font-bold border border-slate-700 flex items-center gap-2">
-                            <i class="fa-solid fa-tags text-orange-500"></i> Rp135.000 / Pcs
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Features Quick Info -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center text-xl font-bold">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-900">Bahan Premium</h4>
-                        <p class="text-xs text-slate-500">Dryfit anti UV & adem</p>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-xl font-bold">
-                        <i class="fa-solid fa-calculator"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-900">DP Otomatis</h4>
-                        <p class="text-xs text-slate-500">Dihitung sistem instan</p>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-xl font-bold">
-                        <i class="fa-brands fa-whatsapp"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-900">Checkout WA</h4>
-                        <p class="text-xs text-slate-500">Langsung ke admin</p>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center text-xl font-bold">
-                        <i class="fa-solid fa-truck-fast"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-900">Pengiriman Cepat</h4>
-                        <p class="text-xs text-slate-500">Ke seluruh Indonesia</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kategori Unggulan -->
-            <div class="space-y-4">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-900">Kategori Jersey</h2>
-                        <p class="text-sm text-slate-500">Pilih jenis jersey sesuai kebutuhan tim atau komunitas Anda</p>
-                    </div>
-                    <button onclick="switchTab('kategori')" class="text-orange-600 font-semibold text-sm hover:underline flex items-center gap-1">Lihat Semua <i class="fa-solid fa-arrow-right text-xs"></i></button>
-                </div>
-                <div id="home-category-list" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-
-            <!-- Produk Terbaru -->
-            <div class="space-y-4">
-                <div class="flex justify-between items-end">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-900">Koleksi Jersey Terbaru</h2>
-                        <p class="text-sm text-slate-500">Desain terbaru dengan kualitas cetak tajam & detail presisi</p>
-                    </div>
-                    <button onclick="switchTab('katalog')" class="text-orange-600 font-semibold text-sm hover:underline flex items-center gap-1">Katalog Lengkap <i class="fa-solid fa-arrow-right text-xs"></i></button>
-                </div>
-                <div id="home-product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 2: KATALOG PRODUK -->
-        <section id="tab-katalog" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Katalog Jersey Lengkap</h2>
-                    <p class="text-sm text-slate-500">Cari, filter, dan pilih jersey favoritmu untuk dipesan</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                    <!-- Search input -->
-                    <div class="relative flex-grow md:w-64">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-search"></i>
-                        </span>
-                        <input type="text" id="catalog-search" oninput="filterCatalog()" placeholder="Cari nama atau kode produk..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <!-- Filter Kategori -->
-                    <select id="catalog-category-filter" onchange="filterCatalog()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option value="">Semua Kategori</option>
-                    </select>
-                    <!-- Sort Harga -->
-                    <select id="catalog-sort" onchange="filterCatalog()" class="bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option value="default">Urutkan</option>
-                        <option value="az">Nama (A - Z)</option>
-                        <option value="za">Nama (Z - A)</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Grid Produk -->
-            <div id="catalog-product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Populated by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 3: KATEGORI PRODUK -->
-        <section id="tab-kategori" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-2xl font-bold text-slate-900">Kategori Jersey Tersedia</h2>
-                <p class="text-sm text-slate-500">Pilih kategori untuk melihat koleksi jersey khusus</p>
-            </div>
-            <div id="category-page-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <!-- Populated by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 4: KERANJANG & CHECKOUT -->
-        <section id="tab-keranjang" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-2xl font-bold text-slate-900"><i class="fa-solid fa-cart-shopping text-orange-500 mr-2"></i> Keranjang & Simulasi Pesanan</h2>
-                <p class="text-sm text-slate-500">Periksa pesanan jersey, hitung total harga, dan kalkulasi DP otomatis</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- List Item Keranjang -->
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="font-bold text-lg text-slate-900 mb-4 pb-2 border-b border-slate-100">Daftar Jersey di Keranjang</h3>
-                        <div id="cart-items-container" class="space-y-4">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Form Data Pemesan -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                        <h3 class="font-bold text-lg text-slate-900 pb-2 border-b border-slate-100"><i class="fa-solid fa-user-pen text-orange-500 mr-2"></i> Form Data Pemesan</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nama Lengkap *</label>
-                                <input type="text" id="order-name" placeholder="cth: Coach Budi Santoso" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nomor WhatsApp *</label>
-                                <input type="tel" id="order-whatsapp" placeholder="cth: 081234567890" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Kota / Kabupaten *</label>
-                                <input type="text" id="order-city" placeholder="cth: Jakarta Selatan" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Alamat Lengkap *</label>
-                                <input type="text" id="order-address" placeholder="cth: Jl. Merdeka No. 45" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Catatan Tambahan (Opsional)</label>
-                            <textarea id="order-notes" rows="2" placeholder="cth: Tambah nama punggung & nomor dada" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ringkasan & Kalkulator DP Otomatis -->
-                <div class="space-y-4">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 sticky top-20 space-y-4">
-                        <h3 class="font-bold text-lg text-slate-900 pb-2 border-b border-slate-100"><i class="fa-solid fa-calculator text-orange-500 mr-2"></i> Ringkasan & Kalkulator DP</h3>
-                        
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between text-slate-600">
-                                <span>Total Jersey:</span>
-                                <span id="summary-total-qty" class="font-bold text-slate-900">0 Pcs</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span>Harga Satuan:</span>
-                                <span class="font-bold text-slate-900">Rp135.000 / Pcs</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600 border-t border-slate-100 pt-2">
-                                <span>Total Harga:</span>
-                                <span id="summary-total-price" class="font-extrabold text-navy-800 text-base">Rp0</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600 bg-orange-500/10 p-3 rounded-xl border border-orange-500/20">
-                                <div>
-                                    <span class="font-bold text-orange-700 block">Total DP Otomatis:</span>
-                                    <span id="dp-tier-label" class="text-[11px] text-orange-600">Berdasarkan jumlah pesanan</span>
-                                </div>
-                                <span id="summary-total-dp" class="font-black text-orange-600 text-lg">Rp0</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600 border-t border-slate-100 pt-2">
-                                <span>Sisa Pembayaran:</span>
-                                <span id="summary-sisa-bayar" class="font-extrabold text-emerald-600 text-base">Rp0</span>
-                            </div>
-                        </div>
-
-                        <div id="dp-warning-box" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Pesanan di atas 100 pcs. Silakan hubungi admin langsung untuk ketentuan DP khusus.
-                        </div>
-
-                        <button onclick="checkoutWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-base">
-                            <i class="fa-brands fa-whatsapp text-xl"></i> CHECKOUT VIA WHATSAPP
-                        </button>
-                        <p class="text-[11px] text-center text-slate-400">Data pesanan otomatis terkirim ke WhatsApp 085126260240</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- TAB 5: RIWAYAT PESANAN -->
-        <section id="tab-riwayat" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Riwayat Pesanan Saya</h2>
-                    <p class="text-sm text-slate-500">Daftar pesanan jersey yang pernah Anda buat di perangkat ini</p>
-                </div>
-                <button onclick="loadRiwayatPesanan()" class="bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl text-sm font-semibold transition"><i class="fa-solid fa-rotate mr-1"></i> Refresh</button>
-            </div>
-            <div id="riwayat-container" class="space-y-4">
-                <!-- Populated by JS -->
-            </div>
-        </section>
-
-        <!-- TAB 6: ADMIN / KELOLA PRODUK & DASHBOARD -->
-        <section id="tab-admin" class="tab-content hidden space-y-6">
-            <!-- Login Admin Modal/Container -->
-            <div id="admin-login-card" class="max-w-md mx-auto bg-white p-8 rounded-3xl shadow-lg border border-slate-200 space-y-6 my-12">
-                <div class="text-center space-y-2">
-                    <div class="w-16 h-16 bg-navy-900 text-orange-500 rounded-2xl mx-auto flex items-center justify-center text-2xl font-bold shadow-md">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <h2 class="text-2xl font-bold text-slate-900">Login Admin Katalog</h2>
-                    <p class="text-xs text-slate-500">Masukkan PIN atau password admin untuk mengelola produk & pesanan</p>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">PIN / Password Admin</label>
-                        <input type="password" id="admin-pin-input" placeholder="Masukkan PIN (cth: admin123)" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-orange-500">
-                    </div>
-                    <button onclick="loginAdmin()" class="w-full bg-navy-900 hover:bg-navy-800 text-white font-bold py-3.5 rounded-xl shadow-lg transition">LOGIN ADMIN</button>
-                    <p class="text-[11px] text-center text-slate-400">Default PIN: <strong class="text-slate-700">admin123</strong> (dapat diubah di menu Pengaturan Admin)</p>
-                </div>
-            </div>
-
-            <!-- Admin Dashboard Panel (Hidden until login) -->
-            <div id="admin-dashboard-panel" class="hidden space-y-6">
-                <!-- Top Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Total Produk</p>
-                        <h3 id="stat-total-produk" class="text-2xl font-extrabold text-navy-900 mt-1">0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Total Pesanan</p>
-                        <h3 id="stat-total-pesanan" class="text-2xl font-extrabold text-navy-900 mt-1">0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Jersey Terjual</p>
-                        <h3 id="stat-jersey-terjual" class="text-2xl font-extrabold text-orange-600 mt-1">0 Pcs</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Total Nilai Pesanan</p>
-                        <h3 id="stat-total-nilai" class="text-xl font-extrabold text-emerald-600 mt-1">Rp0</h3>
-                    </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                        <p class="text-xs text-slate-500 font-semibold uppercase">Total DP Tercatat</p>
-                        <h3 id="stat-total-dp" class="text-xl font-extrabold text-blue-600 mt-1">Rp0</h3>
-                    </div>
-                </div>
-
-                <!-- Admin Tabs Control -->
-                <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-2 items-center">
-                    <button onclick="switchAdminSubTab('produk')" id="admin-btn-produk" class="admin-sub-btn bg-navy-900 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition"><i class="fa-solid fa-shirt mr-2"></i> Kelola Produk</button>
-                    <button onclick="switchAdminSubTab('pesanan')" id="admin-btn-pesanan" class="admin-sub-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition"><i class="fa-solid fa-clipboard-list mr-2"></i> Daftar Pesanan Masuk</button>
-                    <button onclick="switchAdminSubTab('pengaturan')" id="admin-btn-pengaturan" class="admin-sub-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition"><i class="fa-solid fa-key mr-2"></i> Ganti Password / PIN</button>
-                    <button onclick="logoutAdmin()" class="ml-auto bg-rose-50 text-rose-600 hover:bg-rose-100 px-4 py-2.5 rounded-xl font-semibold text-sm transition"><i class="fa-solid fa-right-from-bracket mr-1"></i> Logout</button>
-                </div>
-
-                <!-- Sub-Panel: Kelola Produk -->
-                <div id="admin-sub-produk" class="space-y-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
-                        <div>
-                            <h3 class="font-bold text-xl text-slate-900">Daftar Produk Jersey</h3>
-                            <p class="text-xs text-slate-500">Tambah, edit, atau hapus produk yang tampil di katalog</p>
-                        </div>
-                        <button onclick="openProductModal()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-5 py-2.5 rounded-xl shadow transition flex items-center gap-2 text-sm">
-                            <i class="fa-solid fa-plus"></i> Tambah Produk Baru
-                        </button>
-                    </div>
-
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500">
-                                    <th class="p-4 font-semibold">Produk</th>
-                                    <th class="p-4 font-semibold">Kode</th>
-                                    <th class="p-4 font-semibold">Kategori</th>
-                                    <th class="p-4 font-semibold">Harga</th>
-                                    <th class="p-4 font-semibold">Stok</th>
-                                    <th class="p-4 font-semibold">Status</th>
-                                    <th class="p-4 font-semibold text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-product-table-body" class="divide-y divide-slate-100">
-                                <!-- Populated by JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Sub-Panel: Daftar Pesanan Masuk -->
-                <div id="admin-sub-pesanan" class="hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="font-bold text-xl text-slate-900">Kelola Status Pesanan Pelanggan</h3>
-                        <p class="text-xs text-slate-500">Perbarui status pesanan dari Menunggu Konfirmasi hingga Selesai/Dikirim</p>
-                    </div>
-
-                    <div id="admin-orders-container" class="space-y-4">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Sub-Panel: Ganti Password / PIN Admin -->
-                <div id="admin-sub-pengaturan" class="hidden space-y-6">
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-xl space-y-6">
-                        <div>
-                            <h3 class="font-bold text-xl text-slate-900"><i class="fa-solid fa-key text-orange-500 mr-2"></i> Ubah PIN / Password Admin</h3>
-                            <p class="text-xs text-slate-500 mt-1">Ganti PIN rahasia Anda agar pembeli tidak dapat masuk ke halaman dashboard admin.</p>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">PIN Lama</label>
-                                <input type="password" id="old-admin-pin" placeholder="Masukkan PIN saat ini" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">PIN Baru</label>
-                                <input type="password" id="new-admin-pin" placeholder="Masukkan PIN baru yang aman" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Konfirmasi PIN Baru</label>
-                                <input type="password" id="confirm-admin-pin" placeholder="Ulangi PIN baru" class="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                            </div>
-                            <button onclick="changeAdminPin()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl shadow transition text-sm">
-                                Simpan PIN Baru
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- MODAL DETAIL PRODUK -->
-    <div id="product-detail-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl animate-fade-in max-h-[90vh] flex flex-col">
-            <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
-                <span id="modal-product-code" class="text-xs bg-orange-500 px-3 py-1 rounded-full font-bold">KODE</span>
-                <button onclick="closeProductModalDetail()" class="text-slate-400 hover:text-white p-1.5"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-3">
-                        <div class="h-64 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200">
-                            <img id="modal-main-img" src="" alt="Jersey" class="w-full h-full object-cover">
-                        </div>
-                        <div id="modal-thumbnail-list" class="flex gap-2 overflow-x-auto pb-2">
-                            <!-- Thumbnails -->
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <h2 id="modal-product-name" class="text-2xl font-bold text-slate-900">Nama Produk</h2>
-                        <div class="flex items-center gap-3">
-                            <span class="text-2xl font-black text-orange-600">Rp135.000</span>
-                            <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-semibold" id="modal-product-category">Kategori</span>
-                        </div>
-                        <p id="modal-product-desc" class="text-sm text-slate-600 leading-relaxed">Deskripsi produk...</p>
-                        
-                        <div class="space-y-3 pt-2 border-t border-slate-100">
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Pilih Ukuran</label>
-                                <div id="modal-size-options" class="flex flex-wrap gap-2">
-                                    <!-- Sizes -->
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Pilih Warna</label>
-                                <div id="modal-color-options" class="flex flex-wrap gap-2">
-                                    <!-- Colors -->
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Jumlah (Pcs)</label>
-                                <div class="flex items-center gap-3">
-                                    <button onclick="adjustModalQty(-1)" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-lg">-</button>
-                                    <input type="number" id="modal-qty-input" value="1" min="1" class="w-20 text-center font-bold py-2 bg-slate-50 border border-slate-300 rounded-xl">
-                                    <button onclick="adjustModalQty(1)" class="w-10 h-10 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-lg">+</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
-                <button onclick="closeProductModalDetail()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 font-semibold text-sm rounded-xl transition">Batal</button>
-                <button onclick="addToCartFromModal()" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center gap-2">
-                    <i class="fa-solid fa-cart-plus"></i> Tambah ke Keranjang
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL FORM TAMBAH / EDIT PRODUK ADMIN -->
-    <div id="admin-product-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
-            <div class="p-5 bg-navy-900 text-white flex justify-between items-center">
-                <h3 id="admin-modal-title" class="font-bold text-lg">Tambah Produk Jersey Baru</h3>
-                <button onclick="closeAdminProductModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto space-y-4">
-                <input type="hidden" id="form-prod-id">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Nama Produk *</label>
-                        <input type="text" id="form-prod-name" placeholder="cth: Jersey Home Garuda 2026" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Kode Produk *</label>
-                        <input type="text" id="form-prod-code" placeholder="cth: JRS-001" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Kategori *</label>
-                        <select id="form-prod-category" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                            <option value="Sepak Bola">Sepak Bola</option>
-                            <option value="Futsal">Futsal</option>
-                            <option value="Badminton">Badminton</option>
-                            <option value="Esports">Esports</option>
-                            <option value="Voli">Voli</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Stok Produk</label>
-                        <input type="number" id="form-prod-stock" value="100" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL Foto Utama (Link Gambar) *</label>
-                    <input type="url" id="form-prod-image" placeholder="https://images.unsplash.com/..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">URL Foto Tambahan (Pisahkan dengan koma)</label>
-                    <input type="text" id="form-prod-images" placeholder="https://img1.jpg, https://img2.jpg" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Pilihan Ukuran (Pisahkan koma)</label>
-                    <input type="text" id="form-prod-sizes" value="S, M, L, XL, XXL, 3XL" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Pilihan Warna (Pisahkan koma)</label>
-                    <input type="text" id="form-prod-colors" value="Merah, Putih, Hitam, Navy, Biru" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold uppercase text-slate-600 mb-1">Deskripsi Produk</label>
-                    <textarea id="form-prod-desc" rows="3" placeholder="Deskripsikan bahan, teknologi dryfit, dll..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm"></textarea>
-                </div>
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="form-prod-active" checked class="w-4 h-4 text-orange-600 rounded">
-                    <label class="text-sm font-medium text-slate-700">Produk Aktif di Katalog</label>
-                </div>
-            </div>
-            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-3">
-                <button onclick="closeAdminProductModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 font-semibold text-sm rounded-xl">Batal</button>
-                <button onclick="saveProductData()" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm rounded-xl shadow">Simpan Produk</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Custom Message Box Modal -->
-    <div id="custom-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
-            <div id="modal-icon" class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto">
-                <i class="fa-solid fa-check"></i>
-            </div>
-            <h3 id="modal-title" class="text-xl font-bold text-slate-900">Berhasil</h3>
-            <p id="modal-message" class="text-sm text-slate-600">Pesan sukses...</p>
-            <button onclick="closeCustomModal()" class="w-full bg-navy-900 text-white font-bold py-3 rounded-xl shadow">OK</button>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="bg-navy-900 text-white mt-16 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <div class="space-y-4">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-orange-500 text-white p-2 rounded-xl font-black text-lg">
-                            <i class="fa-solid fa-shirt"></i>
-                        </div>
-                        <span class="font-extrabold text-xl tracking-tight text-white">KATALOG<span class="text-orange-500 ml-1">JERSEY</span></span>
-                    </div>
-                    <p class="text-xs text-slate-400 leading-relaxed">
-                        Pusat pembuatan dan katalog jersey custom profesional dengan harga transparan Rp135.000/pcs, kalkulator DP otomatis, dan pemesanan instan via WhatsApp.
-                    </p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-orange-400 mb-4">Navigasi Utama</h4>
-                    <ul class="space-y-2 text-sm text-slate-300">
-                        <li><button onclick="switchTab('beranda')" class="hover:text-white transition">Beranda</button></li>
-                        <li><button onclick="switchTab('katalog')" class="hover:text-white transition">Katalog Jersey</button></li>
-                        <li><button onclick="switchTab('kategori')" class="hover:text-white transition">Kategori Produk</button></li>
-                        <li><button onclick="switchTab('keranjang')" class="hover:text-white transition">Keranjang Belanja</button></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-orange-400 mb-4">Kategori Populer</h4>
-                    <ul class="space-y-2 text-sm text-slate-300">
-                        <li><a href="#" onclick="filterByCategory('Sepak Bola')" class="hover:text-white transition">Sepak Bola</a></li>
-                        <li><a href="#" onclick="filterByCategory('Futsal')" class="hover:text-white transition">Futsal</a></li>
-                        <li><a href="#" onclick="filterByCategory('Badminton')" class="hover:text-white transition">Badminton</a></li>
-                        <li><a href="#" onclick="filterByCategory('Esports')" class="hover:text-white transition">Esports</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-orange-400 mb-4">Kontak & Layanan</h4>
-                    <ul class="space-y-3 text-sm text-slate-300">
-                        <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp text-green-400 text-lg"></i> 0851-2626-0240</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-clock text-orange-400"></i> Sen - Sab: 09.00 - 20.00 WIB</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-rose-500"></i> Pusat Vendor & Sablon Jersey</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-slate-800 mt-8 pt-8 text-center text-xs text-slate-500">
-                &copy; 2026 KATALOG JERSEY. All Rights Reserved. Professional Jersey Marketplace & Ordering System.
-            </div>
-        </div>
-    </footer>
-
-    <!-- Firebase SDK & Application Logic -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Global App State & Config
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'katalog-jersey-app-2026';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForRuntimeFallback999",
-            authDomain: "dummy-app.firebaseapp.com",
-            projectId: "dummy-app",
-            storageBucket: "dummy-app.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
-        let app, db, auth;
-        let currentUser = null;
-
-        // In-memory data fallback & sync
-        window.productsData = [
-            {
-                id: "prod-1",
-                code: "JRS-001",
-                name: "Jersey Garuda Home Red 2026",
-                category: "Sepak Bola",
-                price: 135000,
-                stock: 150,
-                image: "https://images.unsplash.com/photo-1518063319789-7217e6adc0cc?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1518063319789-7217e6adc0cc?auto=format&fit=crop&w=600&q=80", "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=80"],
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                colors: ["Merah", "Putih"],
-                description: "Jersey timnas edisi spesial dengan bahan Dryfit Nike Interlock anti UV, sablon DTF elastis, dan kerah v-neck elegan.",
-                active: true
-            },
-            {
-                id: "prod-2",
-                code: "JRS-002",
-                name: "Jersey Futsal Pro Strike Blue",
-                category: "Futsal",
-                price: 135000,
-                stock: 120,
-                image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=600&q=80"],
-                sizes: ["M", "L", "XL"],
-                colors: ["Navy", "Biru", "Hitam"],
-                description: "Jersey futsal dengan motif geometri modern, adem saat dipakai, tidak mudah bau keringat.",
-                active: true
-            },
-            {
-                id: "prod-3",
-                code: "JRS-003",
-                name: "Jersey Badminton Smash Elite",
-                category: "Badminton",
-                price: 135000,
-                stock: 80,
-                image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=600&q=80"],
-                sizes: ["S", "M", "L", "XL"],
-                colors: ["Kuning", "Hitam", "Putih"],
-                description: "Dirancang khusus untuk atlet badminton dengan ventilasi ultra-dry di punggung dan ketiak.",
-                active: true
-            },
-            {
-                id: "prod-4",
-                code: "JRS-004",
-                name: "Jersey Esports Cyber Neon",
-                category: "Esports",
-                price: 135000,
-                stock: 95,
-                image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80",
-                images: ["https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80"],
-                sizes: ["S", "M", "L", "XL", "XXL"],
-                colors: ["Hitam", "Ungu", "Neon Green"],
-                description: "Jersey gaming team bergaya futuristik dengan sablon fullprint sublimasi beresolusi tinggi.",
-                active: true
-            }
-        ];
-
-        window.cartData = [];
-        window.ordersData = [];
-        window.categoriesList = [
-            { name: "Sepak Bola", icon: "fa-futbol", image: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=400&q=80", count: 12 },
-            { name: "Futsal", icon: "fa-volleyball", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80", count: 15 },
-            { name: "Badminton", icon: "fa-table-tennis-paddle-ball", image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?auto=format&fit=crop&w=400&q=80", count: 8 },
-            { name: "Esports", icon: "fa-gamepad", image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80", count: 10 },
-            { name: "Voli", icon: "fa-volleyball", image: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=400&q=80", count: 6 },
-            { name: "Lainnya", icon: "fa-shirt", image: "https://images.unsplash.com/photo-1518063319789-7217e6adc0cc?auto=format&fit=crop&w=400&q=80", count: 5 }
-        ];
-
-        window.selectedProductForModal = null;
-        window.selectedModalSize = '';
-        window.selectedModalColor = '';
-
-        // Initialize Firebase
-        try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            if (token) {
-                signInWithCustomToken(auth, token).catch(() => signInAnonymously(auth));
-            } else {
-                signInAnonymously(auth);
-            }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    initFirestoreSync();
-                }
-            });
-        } catch (e) {
-            console.log("Running with local memory fallback:", e);
-            initAppUI();
-        }
-
-        function initFirestoreSync() {
-            if (!db || !currentUser) return;
-            // Public products listener
-            const prodRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-            onSnapshot(prodRef, (snapshot) => {
-                if (!snapshot.empty) {
-                    const cloudProds = [];
-                    snapshot.forEach(doc => { cloudProds.push({ id: doc.id, ...doc.data() }); });
-                    window.productsData = cloudProds;
-                } else {
-                    // Seed initial products if empty
-                    window.productsData.forEach(p => {
-                        setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', p.id), p);
-                    });
-                }
-                initAppUI();
-            }, (error) => {
-                console.log("Firestore products sync error, using local:", error);
-                initAppUI();
-            });
-
-            // Orders listener
-            const ordRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
-            onSnapshot(ordRef, (snapshot) => {
-                const cloudOrders = [];
-                snapshot.forEach(doc => { cloudOrders.push({ id: doc.id, ...doc.data() }); });
-                window.ordersData = cloudOrders;
-                updateAdminStats();
-                renderAdminOrders();
-            }, (err) => {
-                console.log("Orders sync error:", err);
-            });
-        }
-
-        window.onload = function() {
-            initAppUI();
-        };
-
-        function initAppUI() {
-            renderBeranda();
-            renderCatalog();
-            renderCategoriesPage();
-            populateCategoryFilter();
-            renderCart();
-            updateCartBadge();
-            loadRiwayatPesanan();
-            updateAdminStats();
-            renderAdminProducts();
-            renderAdminOrders();
-        }
-
-        // Tab Switching
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.tab === tabName) {
-                    btn.classList.add('bg-navy-900', 'text-orange-400');
-                } else {
-                    btn.classList.remove('bg-navy-900', 'text-orange-400');
-                }
-            });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        window.toggleMobileMenu = function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
-        }
-
-        // Render Beranda
-        function renderBeranda() {
-            // Categories Home
-            const catContainer = document.getElementById('home-category-list');
-            if (catContainer) {
-                catContainer.innerHTML = window.categoriesList.map(c => `
-                    <div onclick="filterByCategory('${c.name}')" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 text-center cursor-pointer hover:border-orange-500 hover:shadow-md transition group">
-                        <div class="w-14 h-14 bg-orange-500/10 text-orange-500 rounded-2xl mx-auto flex items-center justify-center text-xl font-bold mb-3 group-hover:bg-orange-500 group-hover:text-white transition">
-                            <i class="fa-solid ${c.icon}"></i>
-                        </div>
-                        <h4 class="font-bold text-sm text-slate-800">${c.name}</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Koleksi Terbaru</p>
-                    </div>
-                `).join('');
-            }
-
-            // Products Home
-            const prodContainer = document.getElementById('home-product-grid');
-            if (prodContainer) {
-                const activeProds = window.productsData.filter(p => p.active !== false).slice(0, 4);
-                prodContainer.innerHTML = activeProds.map(p => productCardTemplate(p)).join('');
-            }
-        }
-
-        function productCardTemplate(p) {
-            return `
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-lg transition group">
-                    <div>
-                        <div class="relative h-52 bg-slate-100 overflow-hidden cursor-pointer" onclick="openProductDetail('${p.id}')">
-                            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Jersey'">
-                            <span class="absolute top-3 left-3 bg-navy-900/90 backdrop-blur text-white text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">${p.category}</span>
-                            <span class="absolute top-3 right-3 bg-orange-500 text-white text-[10px] px-2.5 py-1 rounded-full font-bold">${p.code}</span>
-                        </div>
-                        <div class="p-4 space-y-2">
-                            <h3 font-bold class="font-bold text-slate-900 text-base line-clamp-1 cursor-pointer hover:text-orange-600 transition" onclick="openProductDetail('${p.id}')">${p.name}</h3>
-                            <p class="text-xs text-slate-500 line-clamp-2">${p.description || 'Jersey custom berkualitas tinggi.'}</p>
-                        </div>
-                    </div>
-                    <div class="p-4 pt-0 flex items-center justify-between border-t border-slate-100 mt-2">
-                        <div>
-                            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Harga Seragam</span>
-                            <span class="font-black text-orange-600 text-base">Rp135.000</span>
-                        </div>
-                        <button onclick="openProductDetail('${p.id}')" class="bg-navy-900 hover:bg-navy-800 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow">
-                            <i class="fa-solid fa-cart-plus"></i> Pilih
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Render Katalog
-        function renderCatalog() {
-            const grid = document.getElementById('catalog-product-grid');
-            if (!grid) return;
-            const searchVal = (document.getElementById('catalog-search')?.value || '').toLowerCase();
-            const catVal = document.getElementById('catalog-category-filter')?.value || '';
-            const sortVal = document.getElementById('catalog-sort')?.value || 'default';
-
-            let list = window.productsData.filter(p => p.active !== false);
-
-            if (searchVal) {
-                list = list.filter(p => p.name.toLowerCase().includes(searchVal) || p.code.toLowerCase().includes(searchVal));
-            }
-            if (catVal) {
-                list = list.filter(p => p.category === catVal);
-            }
-            if (sortVal === 'az') {
-                list.sort((a,b) => a.name.localeCompare(b.name));
-            } else if (sortVal === 'za') {
-                list.sort((a,b) => b.name.localeCompare(a.name));
-            }
-
-            if (list.length === 0) {
-                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400"><i class="fa-solid fa-shirt text-4xl mb-3 text-slate-300"></i><p>Tidak ada produk jersey yang ditemukan.</p></div>`;
-                return;
-            }
-
-            grid.innerHTML = list.map(p => productCardTemplate(p)).join('');
-        }
-
-        window.filterCatalog = function() {
-            renderCatalog();
-        }
-
-        window.filterByCategory = function(catName) {
-            switchTab('katalog');
-            const select = document.getElementById('catalog-category-filter');
-            if (select) {
-                select.value = catName;
-                renderCatalog();
-            }
-        }
-
-        function populateCategoryFilter() {
-            const select = document.getElementById('catalog-category-filter');
-            if (!select) return;
-            const cats = [...new Set(window.productsData.map(p => p.category))];
-            select.innerHTML = `<option value="">Semua Kategori</option>` + cats.map(c => `<option value="${c}">${c}</option>`).join('');
-        }
-
-        function renderCategoriesPage() {
-            const container = document.getElementById('category-page-grid');
-            if (!container) return;
-            container.innerHTML = window.categoriesList.map(c => `
-                <div onclick="filterByCategory('${c.name}')" class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden cursor-pointer hover:border-orange-500 hover:shadow-md transition group">
-                    <div class="h-40 relative overflow-hidden bg-slate-900">
-                        <img src="${c.image}" alt="${c.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-80">
-                        <div class="absolute inset-0 bg-gradient-to-t from-navy-900/90 to-transparent"></div>
-                        <div class="absolute bottom-4 left-4 text-white">
-                            <h3 class="font-extrabold text-xl">${c.name}</h3>
-                            <p class="text-xs text-slate-300">${c.count}+ Model Jersey Tersedia</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Product Detail Modal
-        window.openProductDetail = function(prodId) {
-            const prod = window.productsData.find(p => p.id === prodId);
-            if (!prod) return;
-            window.selectedProductForModal = prod;
-            window.selectedModalSize = prod.sizes?.[0] || 'L';
-            window.selectedModalColor = prod.colors?.[0] || 'Merah';
-
-            document.getElementById('modal-product-code').innerText = prod.code;
-            document.getElementById('modal-main-img').src = prod.image;
-            document.getElementById('modal-product-name').innerText = prod.name;
-            document.getElementById('modal-product-category').innerText = prod.category;
-            document.getElementById('modal-product-desc').innerText = prod.description || '';
-            document.getElementById('modal-qty-input').value = 1;
-
-            // Sizes
-            const sizeContainer = document.getElementById('modal-size-options');
-            const sizes = prod.sizes || ["S", "M", "L", "XL", "XXL"];
-            sizeContainer.innerHTML = sizes.map(s => `
-                <button onclick="selectModalSize('${s}')" class="size-btn px-4 py-2 rounded-xl text-xs font-bold border transition ${s === window.selectedModalSize ? 'bg-navy-900 text-white border-navy-900 shadow' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">${s}</button>
-            `).join('');
-
-            // Colors
-            const colorContainer = document.getElementById('modal-color-options');
-            const colors = prod.colors || ["Merah", "Putih", "Hitam"];
-            colorContainer.innerHTML = colors.map(c => `
-                <button onclick="selectModalColor('${c}')" class="color-btn px-4 py-2 rounded-xl text-xs font-bold border transition ${c === window.selectedModalColor ? 'bg-orange-500 text-white border-orange-500 shadow' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}">${c}</button>
-            `).join('');
-
-            // Thumbnails
-            const thumbContainer = document.getElementById('modal-thumbnail-list');
-            const imgs = prod.images && prod.images.length > 0 ? prod.images : [prod.image];
-            thumbContainer.innerHTML = imgs.map(img => `
-                <div onclick="document.getElementById('modal-main-img').src='${img}'" class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 cursor-pointer hover:border-orange-500">
-                    <img src="${img}" class="w-full h-full object-cover">
-                </div>
-            `).join('');
-
-            document.getElementById('product-detail-modal').classList.remove('hidden');
-        }
-
-        window.closeProductModalDetail = function() {
-            document.getElementById('product-detail-modal').classList.add('hidden');
-        }
-
-        window.selectModalSize = function(size) {
-            window.selectedModalSize = size;
-            document.querySelectorAll('.size-btn').forEach(btn => {
-                if (btn.innerText === size) {
-                    btn.className = "size-btn px-4 py-2 rounded-xl text-xs font-bold border transition bg-navy-900 text-white border-navy-900 shadow";
-                } else {
-                    btn.className = "size-btn px-4 py-2 rounded-xl text-xs font-bold border transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
-                }
-            });
-        }
-
-        window.selectModalColor = function(color) {
-            window.selectedModalColor = color;
-            document.querySelectorAll('.color-btn').forEach(btn => {
-                if (btn.innerText === color) {
-                    btn.className = "color-btn px-4 py-2 rounded-xl text-xs font-bold border transition bg-orange-500 text-white border-orange-500 shadow";
-                } else {
-                    btn.className = "color-btn px-4 py-2 rounded-xl text-xs font-bold border transition bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100";
-                }
-            });
-        }
-
-        window.adjustModalQty = function(change) {
-            const input = document.getElementById('modal-qty-input');
-            let val = parseInt(input.value) + change;
-            if (val < 1) val = 1;
-            input.value = val;
-        }
-
-        window.addToCartFromModal = function() {
-            if (!window.selectedProductForModal) return;
-            const qty = parseInt(document.getElementById('modal-qty-input').value) || 1;
-            const prod = window.selectedProductForModal;
-
-            const cartItem = {
-                cartId: Date.now() + Math.random().toString(),
-                id: prod.id,
-                code: prod.code,
-                name: prod.name,
-                price: 135000,
-                size: window.selectedModalSize,
-                color: window.selectedModalColor,
-                qty: qty,
-                image: prod.image
-            };
-
-            window.cartData.push(cartItem);
-            updateCartBadge();
-            renderCart();
-            closeProductModalDetail();
-            showCustomModal("Berhasil!", `Jersey ${prod.name} (${window.selectedModalSize} - ${window.selectedModalColor}) berhasil ditambahkan ke keranjang.`);
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById('cart-badge');
-            if (!badge) return;
-            const totalQty = window.cartData.reduce((sum, item) => sum + item.qty, 0);
-            badge.innerText = totalQty;
-        }
-
-        // Render Keranjang & Kalkulator DP Otomatis
-        function renderCart() {
-            const container = document.getElementById('cart-items-container');
-            if (!container) return;
-
-            if (window.cartData.length === 0) {
-                container.innerHTML = `
-                    <div class="py-12 text-center text-slate-400 space-y-3">
-                        <i class="fa-solid fa-cart-shopping text-4xl text-slate-300"></i>
-                        <p class="text-sm">Keranjang belanja Anda masih kosong.</p>
-                        <button onclick="switchTab('katalog')" class="bg-orange-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow">Mulai Belanja Jersey</button>
-                    </div>
-                `;
-                updateSummary(0);
-                return;
-            }
-
-            container.innerHTML = window.cartData.map((item, index) => `
-                <div class="flex flex-col sm:flex-row items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200 gap-4">
-                    <div class="flex items-center gap-4 w-full sm:w-auto">
-                        <img src="${item.image}" class="w-16 h-16 object-cover rounded-xl border border-slate-200">
-                        <div>
-                            <span class="text-[10px] bg-orange-500/10 text-orange-600 px-2 py-0.5 rounded font-bold">${item.code}</span>
-                            <h4 class="font-bold text-slate-900 text-sm mt-1">${item.name}</h4>
-                            <p class="text-xs text-slate-500">Ukuran: <strong class="text-slate-700">${item.size}</strong> | Warna: <strong class="text-slate-700">${item.color}</strong></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center justify-between w-full sm:w-auto gap-4">
-                        <div class="flex items-center gap-2">
-                            <button onclick="updateCartQty('${item.cartId}', -1)" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-bold hover:bg-slate-100">-</button>
-                            <span class="w-8 text-center font-bold text-sm">${item.qty}</span>
-                            <button onclick="updateCartQty('${item.cartId}', 1)" class="w-8 h-8 bg-white border border-slate-300 rounded-lg font-bold hover:bg-slate-100">+</button>
-                        </div>
-                        <div class="text-right">
-                            <span class="font-black text-orange-600 text-sm">Rp${(item.price * item.qty).toLocaleString('id-ID')}</span>
-                            <span class="text-[10px] text-slate-400 block">Rp135.000/pcs</span>
-                        </div>
-                        <button onclick="removeFromCart('${item.cartId}')" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                </div>
-            `).join('');
-
-            const totalQty = window.cartData.reduce((sum, item) => sum + item.qty, 0);
-            updateSummary(totalQty);
-        }
-
-        window.updateCartQty = function(cartId, change) {
-            const item = window.cartData.find(i => i.cartId === cartId);
-            if (item) {
-                item.qty += change;
-                if (item.qty <= 0) {
-                    window.cartData = window.cartData.filter(i => i.cartId !== cartId);
-                }
-                updateCartBadge();
-                renderCart();
-            }
-        }
-
-        window.removeFromCart = function(cartId) {
-            window.cartData = window.cartData.filter(i => i.cartId !== cartId);
-            updateCartBadge();
-            renderCart();
-        }
-
-        // Kalkulator DP Otomatis Sesuai Tabel Ketentuan
-        function calculateDP(totalQty, totalPrice) {
-            let dp = 0;
-            let tierText = "";
-
-            if (totalQty === 0) {
-                dp = 0;
-                tierText = "Belum ada pesanan";
-            } else if (totalQty >= 1 && totalQty <= 2) {
-                dp = 50000;
-                tierText = "Ketentuan DP 1–2 pcs: Rp50.000";
-            } else if (totalQty >= 3 && totalQty <= 6) {
-                dp = 150000;
-                tierText = "Ketentuan DP 3–6 pcs: Rp150.000";
-            } else if (totalQty >= 7 && totalQty <= 12) {
-                dp = 250000;
-                tierText = "Ketentuan DP 7–12 pcs: Rp250.000";
-            } else if (totalQty >= 13 && totalQty <= 24) {
-                dp = 300000;
-                tierText = "Ketentuan DP 13–24 pcs: Rp300.000";
-            } else if (totalQty >= 25 && totalQty <= 50) {
-                dp = 500000;
-                tierText = "Ketentuan DP 25–50 pcs: Rp500.000";
-            } else if (totalQty >= 51 && totalQty <= 100) {
-                dp = 1000000;
-                tierText = "Ketentuan DP 51–100 pcs: Rp1.000.000";
-            } else {
-                dp = totalPrice; // atau khusus
-                tierText = "Pesanan >100 pcs (Silakan hubungi admin untuk ketentuan khusus)";
-            }
-
-            // DP tidak boleh melebihi total harga
-            if (dp > totalPrice) dp = totalPrice;
-            return { dp, tierText };
-        }
-
-        function updateSummary(totalQty) {
-            const totalPrice = totalQty * 135000;
-            const { dp, tierText } = calculateDP(totalQty, totalPrice);
-            const sisa = totalPrice - dp;
-
-            document.getElementById('summary-total-qty').innerText = `${totalQty} Pcs`;
-            document.getElementById('summary-total-price').innerText = `Rp${totalPrice.toLocaleString('id-ID')}`;
-            document.getElementById('summary-total-dp').innerText = `Rp${dp.toLocaleString('id-ID')}`;
-            document.getElementById('dp-tier-label').innerText = tierText;
-            document.getElementById('summary-sisa-bayar').innerText = `Rp${sisa.toLocaleString('id-ID')}`;
-
-            const warningBox = document.getElementById('dp-warning-box');
-            if (totalQty > 100) {
-                warningBox.classList.remove('hidden');
-            } else {
-                warningBox.classList.add('hidden');
-            }
-        }
-
-        // Checkout WhatsApp Otomatis
-        window.checkoutWhatsApp = async function() {
-            if (window.cartData.length === 0) {
-                showCustomModal("Keranjang Kosong", "Silakan pilih produk jersey terlebih dahulu sebelum melakukan checkout.", "error");
-                return;
-            }
-
-            const name = document.getElementById('order-name').value.trim();
-            const wa = document.getElementById('order-whatsapp').value.trim();
-            const city = document.getElementById('order-city').value.trim();
-            const address = document.getElementById('order-address').value.trim();
-            const notes = document.getElementById('order-notes').value.trim();
-
-            if (!name || !wa || !city || !address) {
-                showCustomModal("Data Belum Lengkap", "Mohon lengkapi Nama, Nomor WhatsApp, Kota, dan Alamat pengiriman terlebih dahulu.", "error");
-                return;
-            }
-
-            const totalQty = window.cartData.reduce((sum, item) => sum + item.qty, 0);
-            const totalPrice = totalQty * 135000;
-            const { dp } = calculateDP(totalQty, totalPrice);
-            const sisa = totalPrice - dp;
-
-            let detailStr = "";
-            window.cartData.forEach((item, index) => {
-                detailStr += `${index + 1}. Nama Produk: ${item.name}%0A   Kode Produk: ${item.code}%0A   Ukuran: ${item.size}%0A   Warna: ${item.color}%0A   Jumlah: ${item.qty} Pcs%0A`;
-            });
-
-            const waMessage = `HALO ADMIN, SAYA INGIN MEMESAN JERSEY.%0A%0A` +
-                `DATA PEMESAN:%0A` +
-                `Nama: ${name}%0A` +
-                `Nomor WA: ${wa}%0A` +
-                `Kota: ${city}%0A` +
-                `Alamat: ${address}%0A` +
-                `Catatan: ${notes || '-'}%0A%0A` +
-                `DETAIL PESANAN:%0A` +
-                detailStr + `%0A` +
-                `RINGKASAN PEMBAYARAN:%0A` +
-                `Total Jersey: ${totalQty} Pcs%0A` +
-                `Harga Per Jersey: Rp135.000%0A` +
-                `Total Harga: Rp${totalPrice.toLocaleString('id-ID')}%0A` +
-                `DP: Rp${dp.toLocaleString('id-ID')}%0A` +
-                `Sisa Pembayaran: Rp${sisa.toLocaleString('id-ID')}%0A%0A` +
-                `Saya ingin melanjutkan pemesanan. Mohon informasi pembayaran DP.%0ATerima kasih.`;
-
-            // Simpan pesanan ke riwayat lokal & database
-            const orderId = 'ORD-' + Math.floor(100000 + Math.random() * 900000);
-            const newOrder = {
-                orderId: orderId,
-                name: name,
-                whatsapp: wa,
-                city: city,
-                address: address,
-                notes: notes,
-                items: JSON.stringify(window.cartData),
-                totalQty: totalQty,
-                totalPrice: totalPrice,
-                dp: dp,
-                sisa: sisa,
-                date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-                timestamp: Date.now(),
-                status: 'Menunggu Konfirmasi'
-            };
-
-            // Simpan ke localStorage riwayat pelanggan
-            let localRiwayat = JSON.parse(localStorage.getItem('katalog_jersey_riwayat') || '[]');
-            localRiwayat.unshift(newOrder);
-            localStorage.setItem('katalog_jersey_riwayat', JSON.stringify(localRiwayat));
-
-            // Simpan ke Firestore jika aktif
-            if (db && currentUser) {
-                try {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), newOrder);
-                } catch(e) { console.log("Cloud order save err:", e); }
-            }
-
-            // Kosongkan keranjang
-            window.cartData = [];
-            updateCartBadge();
-            renderCart();
-            loadRiwayatPesanan();
-
-            // Buka WhatsApp
-            const waUrl = `https://wa.me/6285126260240?text=${waMessage}`;
-            window.open(waUrl, '_blank');
-        }
-
-        // Riwayat Pesanan
-        window.loadRiwayatPesanan = function() {
-            const container = document.getElementById('riwayat-container');
-            if (!container) return;
-
-            let localRiwayat = [];
-            if (window.ordersData && window.ordersData.length > 0) {
-                localRiwayat = window.ordersData;
-            } else {
-                localRiwayat = JSON.parse(localStorage.getItem('katalog_jersey_riwayat') || '[]');
-            }
-
-            if (localRiwayat.length === 0) {
-                container.innerHTML = `
-                    <div class="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400 space-y-3">
-                        <i class="fa-solid fa-clock-rotate-left text-4xl text-slate-300"></i>
-                        <p class="text-sm">Belum ada riwayat pesanan yang tercatat.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = localRiwayat.map(ord => {
-                let itemsList = [];
-                try { itemsList = typeof ord.items === 'string' ? JSON.parse(ord.items) : ord.items; } catch(e) {}
-                
-                let badgeColor = "bg-amber-100 text-amber-700";
-                if (ord.status === 'DP Dibayar') badgeColor = "bg-blue-100 text-blue-700";
-                if (ord.status === 'Dalam Produksi') badgeColor = "bg-purple-100 text-purple-700";
-                if (ord.status === 'Selesai' || ord.status === 'Dikirim') badgeColor = "bg-emerald-100 text-emerald-700";
-
-                return `
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
-                            <div>
-                                <span class="text-xs font-bold bg-navy-900 text-white px-2.5 py-1 rounded-lg">${ord.orderId}</span>
-                                <span class="text-xs text-slate-500 ml-2"><i class="fa-solid fa-calendar mr-1"></i> ${ord.date || 'Baru saja'}</span>
-                            </div>
-                            <span class="text-xs font-bold px-3 py-1 rounded-full ${badgeColor}">${ord.status || 'Menunggu Konfirmasi'}</span>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p class="text-slate-500 text-xs">Pemesan: <strong class="text-slate-800">${ord.name}</strong> (${ord.whatsapp})</p>
-                                <p class="text-slate-500 text-xs mt-1">Alamat: <strong class="text-slate-800">${ord.address}, ${ord.city}</strong></p>
-                            </div>
-                            <div class="text-left md:text-right">
-                                <p class="text-slate-500 text-xs">Total Jersey: <strong class="text-slate-800">${ord.totalQty} Pcs</strong></p>
-                                <p class="text-slate-500 text-xs mt-1">Total Harga: <strong class="text-slate-900">Rp${(ord.totalPrice || 0).toLocaleString('id-ID')}</strong></p>
-                                <p class="text-orange-600 text-xs mt-0.5">DP Tercatat: <strong>Rp${(ord.dp || 0).toLocaleString('id-ID')}</strong> (Sisa: Rp${(ord.sisa || 0).toLocaleString('id-ID')})</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Admin Auth & Dashboard
-        window.loginAdmin = function() {
-            const pin = document.getElementById('admin-pin-input').value;
-            const savedPin = localStorage.getItem('katalog_jersey_admin_pin') || 'admin123';
-            if (pin === savedPin) {
-                document.getElementById('admin-login-card').classList.add('hidden');
-                document.getElementById('admin-dashboard-panel').classList.remove('hidden');
-                showCustomModal("Login Berhasil", "Selamat datang di Dashboard Admin Katalog Jersey.");
-            } else {
-                showCustomModal("PIN Salah", "PIN atau password yang Anda masukkan salah. Pembeli tidak memiliki akses ke halaman admin.", "error");
-            }
-        }
-
-        window.logoutAdmin = function() {
-            document.getElementById('admin-dashboard-panel').classList.add('hidden');
-            document.getElementById('admin-login-card').classList.remove('hidden');
-            document.getElementById('admin-pin-input').value = '';
-        }
-
-        window.switchAdminSubTab = function(sub) {
-            ['produk', 'pesanan', 'pengaturan'].forEach(tab => {
-                const panel = document.getElementById(`admin-sub-${tab}`);
-                const btn = document.getElementById(`admin-btn-${tab}`);
-                if (tab === sub) {
-                    if(panel) panel.classList.remove('hidden');
-                    if(btn) btn.className = "admin-sub-btn bg-navy-900 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition";
-                } else {
-                    if(panel) panel.classList.add('hidden');
-                    if(btn) btn.className = "admin-sub-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition";
-                }
-            });
-        }
-
-        window.changeAdminPin = function() {
-            const oldPin = document.getElementById('old-admin-pin').value;
-            const newPin = document.getElementById('new-admin-pin').value;
-            const confirmPin = document.getElementById('confirm-admin-pin').value;
-            const currentSavedPin = localStorage.getItem('katalog_jersey_admin_pin') || 'admin123';
-
-            if (oldPin !== currentSavedPin) {
-                showCustomModal("PIN Lama Salah", "PIN lama yang Anda masukkan tidak sesuai.", "error");
-                return;
-            }
-            if (!newPin || newPin.length < 4) {
-                showCustomModal("PIN Terlalu Pendek", "PIN baru minimal harus 4 karakter.", "error");
-                return;
-            }
-            if (newPin !== confirmPin) {
-                showCustomModal("Konfirmasi Tidak Cocok", "Konfirmasi PIN baru tidak sama dengan PIN baru.", "error");
-                return;
-            }
-
-            localStorage.setItem('katalog_jersey_admin_pin', newPin);
-            document.getElementById('old-admin-pin').value = '';
-            document.getElementById('new-admin-pin').value = '';
-            document.getElementById('confirm-admin-pin').value = '';
-            showCustomModal("Berhasil!", "PIN Admin berhasil diubah. Pembeli tidak akan bisa masuk tanpa PIN baru ini.");
-        }
-
-        function updateAdminStats() {
-            const totalProd = window.productsData.length;
-            let orders = window.ordersData.length > 0 ? window.ordersData : JSON.parse(localStorage.getItem('katalog_jersey_riwayat') || '[]');
-            const totalOrders = orders.length;
-            const totalJerseyTerjual = orders.reduce((sum, o) => sum + (o.totalQty || 0), 0);
-            const totalNilai = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
-            const totalDp = orders.reduce((sum, o) => sum + (o.dp || 0), 0);
-
-            if (document.getElementById('stat-total-produk')) {
-                document.getElementById('stat-total-produk').innerText = totalProd;
-                document.getElementById('stat-total-pesanan').innerText = totalOrders;
-                document.getElementById('stat-jersey-terjual').innerText = `${totalJerseyTerjual} Pcs`;
-                document.getElementById('stat-total-nilai').innerText = `Rp${totalNilai.toLocaleString('id-ID')}`;
-                document.getElementById('stat-total-dp').innerText = `Rp${totalDp.toLocaleString('id-ID')}`;
-            }
-        }
-
-        function renderAdminProducts() {
-            const tbody = document.getElementById('admin-product-table-body');
-            if (!tbody) return;
-
-            tbody.innerHTML = window.productsData.map(p => `
-                <tr class="hover:bg-slate-50 transition">
-                    <td class="p-4 flex items-center gap-3">
-                        <img src="${p.image}" class="w-10 h-10 object-cover rounded-lg border">
-                        <span class="font-bold text-slate-900">${p.name}</span>
-                    </td>
-                    <td class="p-4 text-xs font-semibold text-slate-600">${p.code}</td>
-                    <td class="p-4"><span class="text-xs bg-slate-100 px-2.5 py-1 rounded-md font-semibold">${p.category}</span></td>
-                    <td class="p-4 font-black text-orange-600">Rp135.000</td>
-                    <td class="p-4 font-semibold text-slate-700">${p.stock || 100} Pcs</td>
-                    <td class="p-4">
-                        <span class="text-xs font-bold px-2.5 py-1 rounded-full ${p.active !== false ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-                            ${p.active !== false ? 'Aktif' : 'Non-aktif'}
-                        </span>
-                    </td>
-                    <td class="p-4 text-right space-x-2">
-                        <button onclick="editProduct('${p.id}')" class="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2 rounded-xl text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteProduct('${p.id}')" class="bg-rose-50 text-rose-600 hover:bg-rose-100 p-2 rounded-xl text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        window.openProductModal = function(prodId = null) {
-            document.getElementById('form-prod-id').value = '';
-            document.getElementById('form-prod-name').value = '';
-            document.getElementById('form-prod-code').value = 'JRS-' + Math.floor(100 + Math.random() * 900);
-            document.getElementById('form-prod-stock').value = '100';
-            document.getElementById('form-prod-image').value = 'https://images.unsplash.com/photo-1518063319789-7217e6adc0cc?auto=format&fit=crop&w=600&q=80';
-            document.getElementById('form-prod-images').value = '';
-            document.getElementById('form-prod-sizes').value = 'S, M, L, XL, XXL';
-            document.getElementById('form-prod-colors').value = 'Merah, Putih, Hitam, Navy';
-            document.getElementById('form-prod-desc').value = 'Jersey custom berkualitas tinggi dengan bahan Dryfit.';
-            document.getElementById('form-prod-active').checked = true;
-            document.getElementById('admin-modal-title').innerText = "Tambah Produk Jersey Baru";
-
-            if (prodId) {
-                const prod = window.productsData.find(p => p.id === prodId);
-                if (prod) {
-                    document.getElementById('form-prod-id').value = prod.id;
-                    document.getElementById('form-prod-name').value = prod.name;
-                    document.getElementById('form-prod-code').value = prod.code;
-                    document.getElementById('form-prod-category').value = prod.category;
-                    document.getElementById('form-prod-stock').value = prod.stock || 100;
-                    document.getElementById('form-prod-image').value = prod.image;
-                    document.getElementById('form-prod-images').value = (prod.images || []).join(', ');
-                    document.getElementById('form-prod-sizes').value = (prod.sizes || []).join(', ');
-                    document.getElementById('form-prod-colors').value = (prod.colors || []).join(', ');
-                    document.getElementById('form-prod-desc').value = prod.description || '';
-                    document.getElementById('form-prod-active').checked = prod.active !== false;
-                    document.getElementById('admin-modal-title').innerText = "Edit Produk Jersey";
-                }
-            }
-
-            document.getElementById('admin-product-modal').classList.remove('hidden');
-        }
-
-        window.closeAdminProductModal = function() {
-            document.getElementById('admin-product-modal').classList.add('hidden');
-        }
-
-        window.editProduct = function(prodId) {
-            openProductModal(prodId);
-        }
-
-        window.saveProductData = async function() {
-            const id = document.getElementById('form-prod-id').value || ('prod-' + Date.now());
-            const name = document.getElementById('form-prod-name').value.trim();
-            const code = document.getElementById('form-prod-code').value.trim();
-            const category = document.getElementById('form-prod-category').value;
-            const stock = parseInt(document.getElementById('form-prod-stock').value) || 100;
-            const image = document.getElementById('form-prod-image').value.trim();
-            const imagesStr = document.getElementById('form-prod-images').value.trim();
-            const images = imagesStr ? imagesStr.split(',').map(s => s.trim()) : [image];
-            const sizes = document.getElementById('form-prod-sizes').value.split(',').map(s => s.trim());
-            const colors = document.getElementById('form-prod-colors').value.split(',').map(s => s.trim());
-            const description = document.getElementById('form-prod-desc').value.trim();
-            const active = document.getElementById('form-prod-active').checked;
-
-            if (!name || !code || !image) {
-                showCustomModal("Data Belum Lengkap", "Nama, Kode, dan URL Foto utama wajib diisi.", "error");
-                return;
-            }
-
-            const productObj = {
-                id, code, name, category, price: 135000, stock, image, images, sizes, colors, description, active
-            };
-
-            // Update in-memory
-            const idx = window.productsData.findIndex(p => p.id === id);
-            if (idx >= 0) {
-                window.productsData[idx] = productObj;
-            } else {
-                window.productsData.push(productObj);
-            }
-
-            // Sync ke Firestore
-            if (db && currentUser) {
-                try {
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', id), productObj);
-                } catch(e) { console.log("Cloud product save err:", e); }
-            }
-
-            closeAdminProductModal();
-            initAppUI();
-            showCustomModal("Berhasil!", "Data produk jersey berhasil disimpan dan disinkronkan ke katalog.");
-        }
-
-        window.deleteProduct = async function(prodId) {
-            if (confirm("Apakah Anda yakin ingin menghapus produk jersey ini?")) {
-                window.productsData = window.productsData.filter(p => p.id !== prodId);
-                if (db && currentUser) {
-                    try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', prodId));
-                    } catch(e) { console.log("Cloud product delete err:", e); }
-                }
-                initAppUI();
-                showCustomModal("Terhapus", "Produk berhasil dihapus dari katalog.");
-            }
-        }
-
-        function renderAdminOrders() {
-            const container = document.getElementById('admin-orders-container');
-            if (!container) return;
-
-            let orders = window.ordersData.length > 0 ? window.ordersData : JSON.parse(localStorage.getItem('katalog_jersey_riwayat') || '[]');
-            if (orders.length === 0) {
-                container.innerHTML = `<div class="bg-white p-8 rounded-2xl border text-center text-slate-400">Belum ada pesanan masuk.</div>`;
-                return;
-            }
-
-            container.innerHTML = orders.map(ord => `
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
-                        <div>
-                            <span class="text-xs font-bold bg-navy-900 text-white px-2.5 py-1 rounded-lg">${ord.orderId}</span>
-                            <span class="text-xs text-slate-500 ml-2">${ord.date}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs font-semibold">Status:</span>
-                            <select onchange="updateOrderStatus('${ord.orderId}', this.value)" class="bg-slate-100 border border-slate-300 rounded-lg px-3 py-1 text-xs font-bold text-slate-800">
-                                <option value="Menunggu Konfirmasi" ${ord.status === 'Menunggu Konfirmasi' ? 'selected' : ''}>Menunggu Konfirmasi</option>
-                                <option value="Menunggu Pembayaran DP" ${ord.status === 'Menunggu Pembayaran DP' ? 'selected' : ''}>Menunggu Pembayaran DP</option>
-                                <option value="DP Dibayar" ${ord.status === 'DP Dibayar' ? 'selected' : ''}>DP Dibayar</option>
-                                <option value="Dalam Produksi" ${ord.status === 'Dalam Produksi' ? 'selected' : ''}>Dalam Produksi</option>
-                                <option value="Selesai" ${ord.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
-                                <option value="Dikirim" ${ord.status === 'Dikirim' ? 'selected' : ''}>Dikirim</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p class="font-bold text-slate-900">${ord.name} <span class="text-xs text-emerald-600 font-normal">(${ord.whatsapp})</span></p>
-                            <p class="text-xs text-slate-500 mt-1">${ord.address}, ${ord.city}</p>
-                            <p class="text-xs text-slate-500 mt-0.5">Catatan: ${ord.notes || '-'}</p>
-                        </div>
-                        <div class="text-left md:text-right">
-                            <p class="text-xs text-slate-500">Total Jersey: <strong class="text-slate-800">${ord.totalQty} Pcs</strong></p>
-                            <p class="text-xs text-slate-500 mt-0.5">Total Harga: <strong class="text-slate-900">Rp${(ord.totalPrice || 0).toLocaleString('id-ID')}</strong></p>
-                            <p class="text-xs text-orange-600 font-semibold mt-0.5">DP: Rp${(ord.dp || 0).toLocaleString('id-ID')} | Sisa: Rp${(ord.sisa || 0).toLocaleString('id-ID')}</p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        window.updateOrderStatus = async function(orderId, newStatus) {
-            let orders = window.ordersData.length > 0 ? window.ordersData : JSON.parse(localStorage.getItem('katalog_jersey_riwayat') || '[]');
-            const ord = orders.find(o => o.orderId === orderId);
-            if (ord) {
-                ord.status = newStatus;
-                localStorage.setItem('katalog_jersey_riwayat', JSON.stringify(orders));
-                if (db && currentUser) {
-                    try {
-                        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), { status: newStatus });
-                    } catch(e) { console.log("Status update err:", e); }
-                }
-                showCustomModal("Status Diperbarui", `Pesanan ${orderId} diubah menjadi: ${newStatus}`);
-                renderAdminOrders();
-                loadRiwayatPesanan();
-            }
-        }
-
-        // Custom Modal helper (replacing alert)
-        window.showCustomModal = function(title, message, type = 'success') {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-message').innerText = message;
-            const iconDiv = document.getElementById('modal-icon');
-            if (type === 'error') {
-                iconDiv.className = "w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-3xl mx-auto";
-                iconDiv.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
-            } else {
-                iconDiv.className = "w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto";
-                iconDiv.innerHTML = '<i class="fa-solid fa-check"></i>';
-            }
-            document.getElementById('custom-modal').classList.remove('hidden');
-        }
-
-        window.closeCustomModal = function() {
-            document.getElementById('custom-modal').classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
+# PEMBUATAN APLIKASI KATALOG JERSEY ONLINE TERINTEGRASI WHATSAPP
+
+Buatkan aplikasi web katalog jersey profesional, modern, responsif, dan mudah digunakan melalui HP maupun komputer. Aplikasi ini khusus untuk penjualan jersey custom, jersey bola, futsal, voli, jersey merpati, dan produk apparel lainnya.
+
+Nama aplikasi: **KATALOG JERSEY ONLINE**
+
+## 1. TAMPILAN HALAMAN UTAMA (PELANGGAN)
+
+Buat tampilan katalog yang elegan, modern, profesional, dan menarik.
+
+Fitur:
+- Logo toko di bagian atas.
+- Nama toko dan informasi kontak.
+- Banner promosi.
+- Kolom pencarian produk.
+- Kategori produk:
+  - Jersey Bola
+  - Jersey Futsal
+  - Jersey Voli
+  - Jersey Merpati
+  - Jersey Custom
+  - Produk Lainnya
+- Tampilan produk berbentuk grid.
+- Foto produk berkualitas tinggi.
+- Nama produk.
+- Kode produk.
+- Harga produk.
+- Tombol Lihat Detail.
+- Tombol Pesan Sekarang melalui WhatsApp.
+
+## 2. DETAIL PRODUK
+
+Setiap produk memiliki:
+- Foto produk utama.
+- Galeri beberapa foto produk.
+- Nama produk.
+- Kode produk.
+- Deskripsi produk.
+- Pilihan warna jika tersedia.
+- Pilihan ukuran.
+- Harga satuan.
+- Tombol pesan melalui WhatsApp.
+
+## 3. PANEL ADMIN
+
+Buat halaman login admin yang aman.
+
+Username dan password dapat dikelola oleh admin.
+
+Fitur admin:
+- Login dan logout.
+- Mengganti password kapan saja.
+- Mengganti username.
+- Dashboard statistik produk dan pesanan.
+- Upload foto produk.
+- Mengedit foto produk.
+- Menghapus foto produk.
+- Upload beberapa foto sekaligus.
+- Menambahkan produk baru.
+- Mengedit nama produk.
+- Mengedit harga produk.
+- Mengedit deskripsi.
+- Mengedit kategori.
+- Mengedit kode produk.
+- Mengaktifkan dan menonaktifkan produk.
+- Menghapus produk.
+- Mengatur banner promosi.
+- Mengubah nomor WhatsApp toko.
+
+Semua perubahan yang dilakukan admin harus otomatis tersimpan ke database dan langsung tampil di halaman katalog pelanggan.
+
+Gunakan penyimpanan gambar berbasis cloud storage agar foto produk tidak hilang ketika aplikasi diperbarui.
+
+## 4. KALKULATOR DP OTOMATIS
+
+Buat fitur kalkulator DP berdasarkan jumlah baju yang dipesan.
+
+Aturan DP harus mengikuti tabel berikut secara tepat:
+
+| Jumlah Baju | DP |
+|---|---:|
+| 1–3 baju | Rp50.000 |
+| 4–6 baju | Rp150.000 |
+| 7–12 baju | Rp250.000 |
+| 13–24 baju | Rp300.000 |
+| 25–50 baju | Rp500.000 |
+| 51–100 baju | Rp1.000.000 |
+
+Ketentuan:
+- Pelanggan memasukkan jumlah baju.
+- Sistem otomatis menentukan nominal DP.
+- DP langsung berubah ketika jumlah baju diubah.
+- Tampilkan jumlah baju.
+- Tampilkan nominal DP yang harus dibayar.
+- Format rupiah menggunakan format Indonesia.
+- Jika jumlah baju lebih dari 100, tampilkan pesan untuk menghubungi admin.
+- Jumlah baju tidak boleh kurang dari 1.
+
+Contoh:
+Pelanggan memesan 10 baju, sistem otomatis menghitung DP sebesar Rp250.000.
+
+## 5. INTEGRASI WHATSAPP OTOMATIS
+
+Hubungkan aplikasi dengan WhatsApp toko:
+
+Nomor WhatsApp: **085126260240**
+
+Gunakan format internasional Indonesia: 6285126260240.
+
+Setiap produk memiliki tombol Pesan via WhatsApp.
+
+Ketika pelanggan menekan tombol tersebut, sistem otomatis membuka WhatsApp dengan pesan yang sudah terisi.
+
+Contoh pesan:
+
+Halo Admin, saya ingin memesan produk jersey.
+
+Nama Produk: [Nama Produk]
+Kode Produk: [Kode Produk]
+Jumlah Pesanan: [Jumlah Baju]
+Harga Satuan: [Harga]
+Total Pesanan: [Total Harga]
+DP yang Harus Dibayar: [Nominal DP]
+
+Mohon informasi selanjutnya untuk proses pemesanan.
+
+Terima kasih.
+
+Gunakan WhatsApp Click to Chat dengan URL:
+https://wa.me/6285126260240
+
+Pastikan pesan otomatis menggunakan URL encoding agar tidak terjadi kesalahan karakter.
+
+## 6. FORM PEMESANAN
+
+Buat formulir pemesanan yang berisi:
+- Nama pemesan.
+- Nomor WhatsApp pemesan.
+- Nama produk.
+- Kode produk.
+- Jumlah baju.
+- Total harga.
+- Nominal DP otomatis.
+- Catatan tambahan.
+- Tombol Kirim Pesanan ke WhatsApp.
+
+Setelah tombol ditekan, buka WhatsApp dengan seluruh informasi pesanan yang sudah dirangkum.
+
+## 7. DESAIN APLIKASI
+
+Gunakan desain:
+- Modern dan minimalis.
+- Dominasi warna hitam, putih, dan aksen emas.
+- Tampilan premium.
+- Navigasi sederhana.
+- Foto produk menjadi fokus utama.
+- Responsif untuk HP, tablet, dan komputer.
+- Loading cepat.
+- Tampilan katalog seperti toko online profesional.
+
+## 8. TEKNOLOGI DAN DATABASE
+
+Gunakan teknologi modern:
+- Frontend: React atau Next.js.
+- Database: Supabase.
+- Authentication: Supabase Auth.
+- Penyimpanan foto: Supabase Storage.
+- Desain responsif.
+- SEO-friendly.
+- Keamanan panel admin.
+- Validasi formulir.
+- Proteksi halaman admin.
+
+Pastikan pelanggan hanya bisa melihat katalog dan membuat pesanan, sedangkan hanya admin yang dapat mengelola produk, foto, harga, dan pengaturan aplikasi.
+
+## 9. FITUR TAMBAHAN
+
+Tambahkan:
+- Tombol WhatsApp mengambang di halaman utama.
+- Katalog dapat dibagikan melalui link.
+- Setiap produk memiliki link detail sendiri.
+- Admin dapat melihat daftar pesanan.
+- Admin dapat mengubah status pesanan.
+- Status pesanan: Menunggu DP, DP Dibayar, Diproses, Selesai.
+- Riwayat pesanan tersimpan di database.
+- Tombol salin link produk.
+- Produk terbaru otomatis tampil paling atas.
+
+## 10. HASIL AKHIR
+
+Buat aplikasi yang benar-benar berfungsi, bukan sekadar desain atau tampilan demo.
+
+Pastikan:
+1. Admin bisa login.
+2. Admin bisa mengganti password.
+3. Admin bisa upload, edit, dan menghapus foto.
+4. Produk tersimpan permanen di database.
+5. Pelanggan dapat melihat katalog tanpa login.
+6. Kalkulator DP bekerja otomatis sesuai tabel.
+7. Tombol pemesanan terhubung ke WhatsApp 085126260240.
+8. Pesan WhatsApp otomatis berisi detail pesanan.
+9. Aplikasi bisa diakses melalui link website.
+10. Aplikasi siap digunakan untuk bisnis penjualan jersey.
