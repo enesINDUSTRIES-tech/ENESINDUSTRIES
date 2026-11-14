@@ -1,203 +1,2181 @@
-# PEMBUATAN APLIKASI KATALOG JERSEY ONLINE TERINTEGRASI WHATSAPP
+import React, { useState, useEffect, useMemo } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { 
+  getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, 
+  onSnapshot, getDoc 
+} from 'firebase/firestore';
+import { 
+  Search, ShoppingBag, MessageCircle, ShieldCheck, LogOut, Plus, Edit3, 
+  Trash2, CheckCircle2, X, ChevronLeft, ChevronRight, Share2, Copy, 
+  Calculator, Settings, Package, ClipboardList, Image as ImageIcon, 
+  Eye, EyeOff, Upload, Sparkles, Phone, MapPin, Award, AlertCircle, Check
+} from 'lucide-react';
 
-Buatkan aplikasi web katalog jersey profesional, modern, responsif, dan mudah digunakan melalui HP maupun komputer. Aplikasi ini khusus untuk penjualan jersey custom, jersey bola, futsal, voli, jersey merpati, dan produk apparel lainnya.
+// ============================================================================
+// 1. INISIALISASI FIREBASE (CLOUD DATABASE REAL-TIME)
+// ============================================================================
+const firebaseConfig = typeof __firebase_config !== 'undefined' 
+  ? JSON.parse(__firebase_config) 
+  : { apiKey: "demo-key", authDomain: "demo.firebaseapp.com", projectId: "demo-project" };
 
-Nama aplikasi: **KATALOG JERSEY ONLINE**
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'katalog-jersey-online';
 
-## 1. TAMPILAN HALAMAN UTAMA (PELANGGAN)
+// ============================================================================
+// 2. DATA AWAL (SEED DATA) JIKA DATABASE MASIH KOSONG
+// ============================================================================
+const INITIAL_PRODUCTS = [
+  {
+    name: "Jersey Bola Pro Edition Gold Black",
+    code: "JB-001",
+    category: "Jersey Bola",
+    price: 165000,
+    description: "Jersey sepak bola full printing sublimasi dengan bahan Dri-Fit Milano premium. Ringan, menyerap keringat dengan cepat, dan jahitan rantai standar ekspor.",
+    colors: ["Hitam Emas", "Putih Emas", "Navy Gold"],
+    sizes: ["S", "M", "L", "XL", "XXL", "3XL"],
+    active: true,
+    createdAt: Date.now() + 5000,
+    images: [
+      "https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    name: "Jersey Futsal Elite Phantom Series",
+    code: "JF-002",
+    category: "Jersey Futsal",
+    price: 150000,
+    description: "Desain aerodinamis khusus pemain futsal agresif. Menggunakan kerah V-neck elastis dan bahan Brazil Emboss yang sejuk di lapangan indoor.",
+    colors: ["Hitam Carbon", "Putih Pearl", "Merah Maroon"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    active: true,
+    createdAt: Date.now() + 4000,
+    images: [
+      "https://images.unsplash.com/photo-1577212017184-80cc0da11082?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    name: "Jersey Voli Pro League Sleeveless & Short",
+    code: "JV-003",
+    category: "Jersey Voli",
+    price: 155000,
+    description: "Setelan jersey voli dengan potongan ergonomis untuk lompatan maksimal. Tinta sublimasi anti-luntur bersertifikat OEKO-TEX.",
+    colors: ["Hitam Emas", "Biru Elektrik", "Putih"],
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    active: true,
+    createdAt: Date.now() + 3000,
+    images: [
+      "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    name: "Jersey Merpati Kolong Exclusive Team",
+    code: "JM-004",
+    category: "Jersey Merpati",
+    price: 175000,
+    description: "Jersey komunitas & tim merpati kolong/balap dengan lengan panjang, pelindung UV, dan desain full custom logo tim serta nama joki.",
+    colors: ["Hitam Gold", "Emas Metalik", "Putih Hitam"],
+    sizes: ["M", "L", "XL", "XXL", "3XL"],
+    active: true,
+    createdAt: Date.now() + 2000,
+    images: [
+      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    name: "Jersey Custom Desain Bebas Satuan & Tim",
+    code: "JC-005",
+    category: "Jersey Custom",
+    price: 160000,
+    description: "Bebas request desain, logo sponsor, nama punggung, dan nomor. Gratis jasa desain profesional untuk pemesanan minimal 6 pcs.",
+    colors: ["Custom Sesuai Request"],
+    sizes: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    active: true,
+    createdAt: Date.now() + 1000,
+    images: [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    name: "Jaket Tracktop & Celana Training Tim",
+    code: "PL-006",
+    category: "Produk Lainnya",
+    price: 235000,
+    description: "Jaket official tim berbahan Lotto Diadora premium dengan resleting waterproof dan bordir/sublimasi logo klub.",
+    colors: ["Hitam Emas", "Hitam Putih"],
+    sizes: ["M", "L", "XL", "XXL"],
+    active: true,
+    createdAt: Date.now(),
+    images: [
+      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=800&q=80"
+    ]
+  }
+];
 
-Buat tampilan katalog yang elegan, modern, profesional, dan menarik.
+const CATEGORIES = [
+  "Semua",
+  "Jersey Bola",
+  "Jersey Futsal",
+  "Jersey Voli",
+  "Jersey Merpati",
+  "Jersey Custom",
+  "Produk Lainnya"
+];
 
-Fitur:
-- Logo toko di bagian atas.
-- Nama toko dan informasi kontak.
-- Banner promosi.
-- Kolom pencarian produk.
-- Kategori produk:
-  - Jersey Bola
-  - Jersey Futsal
-  - Jersey Voli
-  - Jersey Merpati
-  - Jersey Custom
-  - Produk Lainnya
-- Tampilan produk berbentuk grid.
-- Foto produk berkualitas tinggi.
-- Nama produk.
-- Kode produk.
-- Harga produk.
-- Tombol Lihat Detail.
-- Tombol Pesan Sekarang melalui WhatsApp.
+const ORDER_STATUSES = [
+  "Menunggu DP",
+  "DP Dibayar",
+  "Diproses",
+  "Selesai"
+];
 
-## 2. DETAIL PRODUK
+// ============================================================================
+// 3. HELPER FUNCTIONS (FORMAT RUPIAH, KALKULATOR DP, WHATSAPP, KOMPRESI FOTO)
+// ============================================================================
+const formatRupiah = (angka) => {
+  if (angka === null || angka === undefined || isNaN(angka)) return "Rp0";
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(angka).replace(/\s/g, '');
+};
 
-Setiap produk memiliki:
-- Foto produk utama.
-- Galeri beberapa foto produk.
-- Nama produk.
-- Kode produk.
-- Deskripsi produk.
-- Pilihan warna jika tersedia.
-- Pilihan ukuran.
-- Harga satuan.
-- Tombol pesan melalui WhatsApp.
+const calculateDP = (qty) => {
+  const count = parseInt(qty, 10);
+  if (isNaN(count) || count < 1) {
+    return { valid: false, amount: 0, message: "Jumlah baju minimal 1" };
+  }
+  if (count >= 1 && count <= 3) return { valid: true, amount: 50000, label: formatRupiah(50000) };
+  if (count >= 4 && count <= 6) return { valid: true, amount: 150000, label: formatRupiah(150000) };
+  if (count >= 7 && count <= 12) return { valid: true, amount: 250000, label: formatRupiah(250000) };
+  if (count >= 13 && count <= 24) return { valid: true, amount: 300000, label: formatRupiah(300000) };
+  if (count >= 25 && count <= 50) return { valid: true, amount: 500000, label: formatRupiah(500000) };
+  if (count >= 51 && count <= 100) return { valid: true, amount: 1000000, label: formatRupiah(1000000) };
+  return { 
+    valid: true, 
+    isOver100: true, 
+    amount: 0, 
+    label: "Hubungi Admin (>100 Baju)",
+    message: "Untuk pemesanan lebih dari 100 baju, silakan hubungi Admin untuk penawaran & DP khusus."
+  };
+};
 
-## 3. PANEL ADMIN
+// Kompresi gambar otomatis sebelum disimpan ke cloud agar cepat & anti-gagal
+const compressImageToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
+        canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
 
-Buat halaman login admin yang aman.
+// ============================================================================
+// 4. KOMPONEN UTAMA APLIKASI
+// ============================================================================
+export default function App() {
+  // Auth & Database State
+  const [user, setUser] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [storeSettings, setStoreSettings] = useState({
+    storeName: "KATALOG JERSEY ONLINE",
+    tagline: "Premium Custom Apparel & Sportswear",
+    whatsapp: "6285126260240",
+    whatsappDisplay: "085126260240",
+    address: "Indonesia • Pengiriman Seluruh Nusantara",
+    bannerTitle: "BIKIN JERSEY TIM IMPIANMU SEKARANG!",
+    bannerSubtitle: "Full Printing Sublimasi Premium • Bebas Custom Desain, Nama & Nomor Punggung • Garansi Kualitas Jahitan",
+    bannerBadge: "PROMO GRATIS DESAIN TIM",
+    bannerImage: "https://images.unsplash.com/photo-1518605368461-1ee7e33f205f?auto=format&fit=crop&w=1400&q=80"
+  });
+  const [adminCreds, setAdminCreds] = useState({
+    username: "admin",
+    password: "password123"
+  });
 
-Username dan password dapat dikelola oleh admin.
+  // UI & Navigation State
+  const [view, setView] = useState("catalog"); // "catalog" | "adminLogin" | "adminPanel"
+  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [orderModalProduct, setOrderModalProduct] = useState(null);
+  const [showDPCalculatorModal, setShowDPCalculatorModal] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
-Fitur admin:
-- Login dan logout.
-- Mengganti password kapan saja.
-- Mengganti username.
-- Dashboard statistik produk dan pesanan.
-- Upload foto produk.
-- Mengedit foto produk.
-- Menghapus foto produk.
-- Upload beberapa foto sekaligus.
-- Menambahkan produk baru.
-- Mengedit nama produk.
-- Mengedit harga produk.
-- Mengedit deskripsi.
-- Mengedit kategori.
-- Mengedit kode produk.
-- Mengaktifkan dan menonaktifkan produk.
-- Menghapus produk.
-- Mengatur banner promosi.
-- Mengubah nomor WhatsApp toko.
+  // Toast Notification Helper (Pengganti alert())
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3800);
+  };
 
-Semua perubahan yang dilakukan admin harus otomatis tersimpan ke database dan langsung tampil di halaman katalog pelanggan.
+  // --------------------------------------------------------------------------
+  // FIREBASE AUTHENTICATION & REALTIME LISTENERS
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (err) {
+        console.error("Auth error:", err);
+      }
+    };
+    initAuth();
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
 
-Gunakan penyimpanan gambar berbasis cloud storage agar foto produk tidak hilang ketika aplikasi diperbarui.
+  // Load Data dari Firestore setelah terautentikasi
+  useEffect(() => {
+    if (!user) return;
 
-## 4. KALKULATOR DP OTOMATIS
+    // 1. Listener Produk
+    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'products');
+    const unsubProducts = onSnapshot(productsRef, async (snapshot) => {
+      if (snapshot.empty) {
+        // Seed initial products jika database kosong
+        for (const item of INITIAL_PRODUCTS) {
+          await addDoc(productsRef, item);
+        }
+      } else {
+        const list = snapshot.docs.map(docSnap => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+        // Urutkan produk terbaru paling atas
+        list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        setProducts(list);
 
-Buat fitur kalkulator DP berdasarkan jumlah baju yang dipesan.
+        // Cek URL parameter ?product=ID untuk direct link produk
+        const params = new URLSearchParams(window.location.search);
+        const sharedProdId = params.get('product');
+        if (sharedProdId) {
+          const found = list.find(p => p.id === sharedProdId || p.code === sharedProdId);
+          if (found) setSelectedProduct(found);
+        }
+      }
+    }, (err) => console.error("Products snapshot error:", err));
 
-Aturan DP harus mengikuti tabel berikut secara tepat:
+    // 2. Listener Pengaturan Toko & Banner
+    const settingsDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'storeConfig');
+    const unsubSettings = onSnapshot(settingsDocRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        setStoreSettings(prev => ({ ...prev, ...docSnap.data() }));
+      } else {
+        await setDoc(settingsDocRef, storeSettings);
+      }
+    }, (err) => console.error("Settings snapshot error:", err));
 
-| Jumlah Baju | DP |
-|---|---:|
-| 1–3 baju | Rp50.000 |
-| 4–6 baju | Rp150.000 |
-| 7–12 baju | Rp250.000 |
-| 13–24 baju | Rp300.000 |
-| 25–50 baju | Rp500.000 |
-| 51–100 baju | Rp1.000.000 |
+    // 3. Listener Kredensial Admin
+    const adminDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminAuth');
+    const unsubAdmin = onSnapshot(adminDocRef, async (docSnap) => {
+      if (docSnap.exists()) {
+        setAdminCreds(docSnap.data());
+      } else {
+        await setDoc(adminDocRef, { username: "admin", password: "password123" });
+      }
+    }, (err) => console.error("Admin creds snapshot error:", err));
 
-Ketentuan:
-- Pelanggan memasukkan jumlah baju.
-- Sistem otomatis menentukan nominal DP.
-- DP langsung berubah ketika jumlah baju diubah.
-- Tampilkan jumlah baju.
-- Tampilkan nominal DP yang harus dibayar.
-- Format rupiah menggunakan format Indonesia.
-- Jika jumlah baju lebih dari 100, tampilkan pesan untuk menghubungi admin.
-- Jumlah baju tidak boleh kurang dari 1.
+    // 4. Listener Daftar Pesanan
+    const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+    const unsubOrders = onSnapshot(ordersRef, (snapshot) => {
+      const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      setOrders(list);
+    }, (err) => console.error("Orders snapshot error:", err));
 
-Contoh:
-Pelanggan memesan 10 baju, sistem otomatis menghitung DP sebesar Rp250.000.
+    return () => {
+      unsubProducts();
+      unsubSettings();
+      unsubAdmin();
+      unsubOrders();
+    };
+  }, [user]);
 
-## 5. INTEGRASI WHATSAPP OTOMATIS
+  // Filter Produk untuk Pelanggan
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      if (p.active === false) return false;
+      const matchCat = selectedCategory === "Semua" || p.category === selectedCategory;
+      const q = searchQuery.toLowerCase().trim();
+      const matchSearch = !q || 
+        p.name.toLowerCase().includes(q) || 
+        p.code.toLowerCase().includes(q) || 
+        p.category.toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+  }, [products, selectedCategory, searchQuery]);
 
-Hubungkan aplikasi dengan WhatsApp toko:
+  // Helper Copy Link Produk / Katalog
+  const handleCopyLink = (productId = null) => {
+    const url = new URL(window.location.href);
+    if (productId) {
+      url.searchParams.set('product', productId);
+    } else {
+      url.searchParams.delete('product');
+    }
+    navigator.clipboard.writeText(url.toString());
+    showToast(productId ? "Link detail produk berhasil disalin!" : "Link katalog toko berhasil disalin!");
+  };
 
-Nomor WhatsApp: **085126260240**
+  // Format nomor WA ke 628...
+  const getCleanWaNumber = () => {
+    let num = (storeSettings.whatsapp || "6285126260240").replace(/\D/g, '');
+    if (num.startsWith('0')) num = '62' + num.slice(1);
+    if (!num.startsWith('62')) num = '62' + num;
+    return num;
+  };
 
-Gunakan format internasional Indonesia: 6285126260240.
+  // Langsung buka WA untuk produk tertentu (1 pcs default atau dari form)
+  const openDirectWhatsAppProduct = (product, qty = 1, customerInfo = null) => {
+    const waNum = getCleanWaNumber();
+    const total = product.price * qty;
+    const dpInfo = calculateDP(qty);
+    const dpText = dpInfo.isOver100 ? "Hubungi Admin (>100 baju)" : dpInfo.label;
 
-Setiap produk memiliki tombol Pesan via WhatsApp.
+    let message = "";
+    if (customerInfo) {
+      message = `Halo Admin, saya ingin memesan produk jersey.\n\n` +
+        `*DATA PEMESAN*\n` +
+        `Nama Pemesan: ${customerInfo.customerName}\n` +
+        `No. WhatsApp: ${customerInfo.customerWa}\n\n` +
+        `*DETAIL PESANAN*\n` +
+        `Nama Produk: ${product.name}\n` +
+        `Kode Produk: ${product.code}\n` +
+        `Warna: ${customerInfo.color || '-'}\n` +
+        `Ukuran: ${customerInfo.size || '-'}\n` +
+        `Jumlah Pesanan: ${qty} baju\n` +
+        `Harga Satuan: ${formatRupiah(product.price)}\n` +
+        `Total Pesanan: ${formatRupiah(total)}\n` +
+        `DP yang Harus Dibayar: ${dpText}\n` +
+        `Catatan: ${customerInfo.notes || '-'}\n\n` +
+        `Mohon informasi selanjutnya untuk proses pemesanan.\nTerima kasih.`;
+    } else {
+      message = `Halo Admin, saya ingin memesan produk jersey.\n\n` +
+        `Nama Produk: ${product.name}\n` +
+        `Kode Produk: ${product.code}\n` +
+        `Jumlah Pesanan: ${qty} baju\n` +
+        `Harga Satuan: ${formatRupiah(product.price)}\n` +
+        `Total Pesanan: ${formatRupiah(total)}\n` +
+        `DP yang Harus Dibayar: ${dpText}\n\n` +
+        `Mohon informasi selanjutnya untuk proses pemesanan.\nTerima kasih.`;
+    }
 
-Ketika pelanggan menekan tombol tersebut, sistem otomatis membuka WhatsApp dengan pesan yang sudah terisi.
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/${waNum}?text=${encoded}`, '_blank');
+  };
 
-Contoh pesan:
+  // ==========================================================================
+  // RENDER VIEW BERDASARKAN STATE
+  // ==========================================================================
+  return (
+    <div className="min-h-screen bg-neutral-50 text-neutral-900 font-sans selection:bg-amber-400 selection:text-black">
+      {/* TOAST NOTIFICATION */}
+      {toast && (
+        <div className="fixed top-5 right-5 z-50 animate-bounce">
+          <div className={`flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl border ${
+            toast.type === 'error' 
+              ? 'bg-red-950 text-white border-red-500' 
+              : 'bg-neutral-950 text-amber-400 border-amber-500/50'
+          }`}>
+            {toast.type === 'error' ? <AlertCircle className="w-5 h-5 text-red-400" /> : <CheckCircle2 className="w-5 h-5 text-amber-400" />}
+            <span className="text-sm font-medium text-white">{toast.message}</span>
+          </div>
+        </div>
+      )}
 
-Halo Admin, saya ingin memesan produk jersey.
+      {/* ====================================================================== */}
+      {/* HEADER / NAVBAR UTAMA                                                  */}
+      {/* ====================================================================== */}
+      <header className="sticky top-0 z-40 bg-neutral-950 text-white border-b border-amber-500/30 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            {/* Logo & Nama Toko */}
+            <div 
+              onClick={() => { setView("catalog"); setSelectedProduct(null); }}
+              className="flex items-center gap-3 cursor-pointer group"
+            >
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform">
+                <Award className="w-6 h-6 text-neutral-950 stroke-[2.5]" />
+              </div>
+              <div>
+                <h1 className="text-lg sm:text-xl font-extrabold tracking-wider bg-gradient-to-r from-white via-amber-200 to-amber-400 bg-clip-text text-transparent">
+                  {storeSettings.storeName}
+                </h1>
+                <p className="text-[11px] sm:text-xs text-neutral-400 flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  WA: {storeSettings.whatsappDisplay || "085126260240"}
+                </p>
+              </div>
+            </div>
 
-Nama Produk: [Nama Produk]
-Kode Produk: [Kode Produk]
-Jumlah Pesanan: [Jumlah Baju]
-Harga Satuan: [Harga]
-Total Pesanan: [Total Harga]
-DP yang Harus Dibayar: [Nominal DP]
+            {/* Navigasi Kanan */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {view === "catalog" && (
+                <>
+                  <button
+                    onClick={() => setShowDPCalculatorModal(true)}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-400 border border-amber-500/30 text-xs sm:text-sm font-semibold transition"
+                  >
+                    <Calculator className="w-4 h-4" />
+                    <span className="hidden md:inline">Kalkulator DP</span>
+                    <span className="md:hidden">DP</span>
+                  </button>
 
-Mohon informasi selanjutnya untuk proses pemesanan.
+                  <button
+                    onClick={() => handleCopyLink(null)}
+                    title="Bagikan Link Katalog"
+                    className="p-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-amber-400 border border-neutral-800 transition"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </button>
+                </>
+              )}
 
-Terima kasih.
+              {isAdminAuthenticated ? (
+                <button
+                  onClick={() => setView(view === "adminPanel" ? "catalog" : "adminPanel")}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-neutral-950 font-bold text-xs sm:text-sm shadow-md hover:brightness-110 transition"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>{view === "adminPanel" ? "Lihat Katalog" : "Panel Admin"}</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setView(view === "adminLogin" ? "catalog" : "adminLogin")}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white border border-neutral-800 text-xs font-medium transition"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-500" />
+                  <span className="hidden sm:inline">{view === "adminLogin" ? "Kembali" : "Admin"}</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
 
-Gunakan WhatsApp Click to Chat dengan URL:
-https://wa.me/6285126260240
+      {/* ====================================================================== */}
+      {/* VIEW 1: HALAMAN LOGIN ADMIN                                            */}
+      {/* ====================================================================== */}
+      {view === "adminLogin" && !isAdminAuthenticated && (
+        <AdminLoginView 
+          adminCreds={adminCreds}
+          onSuccess={() => {
+            setIsAdminAuthenticated(true);
+            setView("adminPanel");
+            showToast("Berhasil masuk ke Panel Admin!");
+          }}
+          onCancel={() => setView("catalog")}
+        />
+      )}
 
-Pastikan pesan otomatis menggunakan URL encoding agar tidak terjadi kesalahan karakter.
+      {/* ====================================================================== */}
+      {/* VIEW 2: PANEL ADMIN LENGKAP                                            */}
+      {/* ====================================================================== */}
+      {view === "adminPanel" && isAdminAuthenticated && (
+        <AdminPanelView 
+          products={products}
+          orders={orders}
+          storeSettings={storeSettings}
+          adminCreds={adminCreds}
+          db={db}
+          appId={appId}
+          showToast={showToast}
+          onLogout={() => {
+            setIsAdminAuthenticated(false);
+            setView("catalog");
+            showToast("Anda telah keluar dari Panel Admin.");
+          }}
+        />
+      )}
 
-## 6. FORM PEMESANAN
+      {/* ====================================================================== */}
+      {/* VIEW 3: HALAMAN UTAMA KATALOG PELANGGAN                                */}
+      {/* ====================================================================== */}
+      {view === "catalog" && (
+        <main className="pb-24">
+          {/* BANNER PROMOSI PREMIUM */}
+          <section className="relative bg-neutral-950 text-white overflow-hidden border-b border-amber-500/20">
+            <div className="absolute inset-0 opacity-30">
+              <img 
+                src={storeSettings.bannerImage} 
+                alt="Banner Promo Jersey" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-950/85 to-neutral-950/40"></div>
+            </div>
 
-Buat formulir pemesanan yang berisi:
-- Nama pemesan.
-- Nomor WhatsApp pemesan.
-- Nama produk.
-- Kode produk.
-- Jumlah baju.
-- Total harga.
-- Nominal DP otomatis.
-- Catatan tambahan.
-- Tombol Kirim Pesanan ke WhatsApp.
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+              <div className="max-w-2xl space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-400 text-xs font-bold tracking-wider uppercase">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {storeSettings.bannerBadge}
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+                  {storeSettings.bannerTitle}
+                </h2>
+                <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
+                  {storeSettings.bannerSubtitle}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <button
+                    onClick={() => setShowDPCalculatorModal(true)}
+                    className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-neutral-950 font-extrabold text-sm shadow-lg shadow-amber-500/25 hover:brightness-110 transition flex items-center gap-2"
+                  >
+                    <Calculator className="w-4 h-4" />
+                    Hitung Simulasi DP
+                  </button>
+                  <a
+                    href={`https://wa.me/${getCleanWaNumber()}?text=${encodeURIComponent("Halo Admin, saya ingin konsultasi pemesanan jersey custom.")}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/20 font-semibold text-sm transition flex items-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-400" />
+                    Konsultasi Desain WA
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
 
-Setelah tombol ditekan, buka WhatsApp dengan seluruh informasi pesanan yang sudah dirangkum.
+          {/* KALKULATOR DP INLINE RINGKAS & INTERAKTIF */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10">
+            <InlineDPCalculator />
+          </section>
 
-## 7. DESAIN APLIKASI
+          {/* PENCARIAN & FILTER KATEGORI */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-neutral-200/80 space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="w-5 h-5 text-neutral-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Cari nama jersey, kode produk (misal: JB-001), atau kategori..."
+                  className="w-full pl-12 pr-10 py-3.5 bg-neutral-100 focus:bg-white rounded-xl border border-transparent focus:border-amber-500 outline-none text-sm transition"
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
-Gunakan desain:
-- Modern dan minimalis.
-- Dominasi warna hitam, putih, dan aksen emas.
-- Tampilan premium.
-- Navigasi sederhana.
-- Foto produk menjadi fokus utama.
-- Responsif untuk HP, tablet, dan komputer.
-- Loading cepat.
-- Tampilan katalog seperti toko online profesional.
+              {/* Kategori Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition ${
+                      selectedCategory === cat
+                        ? "bg-neutral-950 text-amber-400 shadow-md border border-amber-500/40"
+                        : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
 
-## 8. TEKNOLOGI DAN DATABASE
+          {/* GRID KATALOG PRODUK */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-neutral-900">
+                  {selectedCategory === "Semua" ? "Koleksi Jersey Terbaru" : selectedCategory}
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-500">
+                  Menampilkan {filteredProducts.length} produk siap pesan
+                </p>
+              </div>
+            </div>
 
-Gunakan teknologi modern:
-- Frontend: React atau Next.js.
-- Database: Supabase.
-- Authentication: Supabase Auth.
-- Penyimpanan foto: Supabase Storage.
-- Desain responsif.
-- SEO-friendly.
-- Keamanan panel admin.
-- Validasi formulir.
-- Proteksi halaman admin.
+            {filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-2xl p-12 text-center border border-neutral-200">
+                <ShoppingBag className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
+                <h4 className="text-lg font-bold text-neutral-800">Produk tidak ditemukan</h4>
+                <p className="text-sm text-neutral-500 mt-1">Coba kata kunci lain atau pilih kategori "Semua".</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProducts.map((product) => (
+                  <div 
+                    key={product.id}
+                    className="group bg-white rounded-2xl overflow-hidden border border-neutral-200/90 shadow-sm hover:shadow-xl hover:border-amber-400/60 transition-all duration-300 flex flex-col"
+                  >
+                    {/* Foto Produk */}
+                    <div 
+                      onClick={() => setSelectedProduct(product)}
+                      className="relative aspect-[4/3] bg-neutral-900 overflow-hidden cursor-pointer"
+                    >
+                      <img
+                        src={product.images?.[0] || "https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&w=800&q=80"}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute top-3 left-3 flex items-center gap-2">
+                        <span className="px-2.5 py-1 rounded-lg bg-neutral-950/85 backdrop-blur-md text-amber-400 text-[11px] font-bold border border-amber-500/30">
+                          {product.code}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-neutral-900 text-[11px] font-bold">
+                          {product.category}
+                        </span>
+                      </div>
+                      {product.images?.length > 1 && (
+                        <span className="absolute bottom-3 right-3 px-2 py-1 rounded-md bg-black/70 text-white text-[10px] font-medium">
+                          +{product.images.length - 1} Foto
+                        </span>
+                      )}
+                    </div>
 
-Pastikan pelanggan hanya bisa melihat katalog dan membuat pesanan, sedangkan hanya admin yang dapat mengelola produk, foto, harga, dan pengaturan aplikasi.
+                    {/* Informasi Produk */}
+                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                      <div>
+                        <h4 
+                          onClick={() => setSelectedProduct(product)}
+                          className="text-lg font-extrabold text-neutral-900 group-hover:text-amber-600 transition cursor-pointer line-clamp-2"
+                        >
+                          {product.name}
+                        </h4>
+                        <p className="text-xs text-neutral-500 mt-1.5 line-clamp-2">
+                          {product.description}
+                        </p>
+                      </div>
 
-## 9. FITUR TAMBAHAN
+                      <div className="space-y-3 pt-2 border-t border-neutral-100">
+                        <div className="flex items-baseline justify-between">
+                          <span className="text-xs text-neutral-500">Harga Satuan</span>
+                          <span className="text-xl font-black text-neutral-950">
+                            {formatRupiah(product.price)}
+                          </span>
+                        </div>
 
-Tambahkan:
-- Tombol WhatsApp mengambang di halaman utama.
-- Katalog dapat dibagikan melalui link.
-- Setiap produk memiliki link detail sendiri.
-- Admin dapat melihat daftar pesanan.
-- Admin dapat mengubah status pesanan.
-- Status pesanan: Menunggu DP, DP Dibayar, Diproses, Selesai.
-- Riwayat pesanan tersimpan di database.
-- Tombol salin link produk.
-- Produk terbaru otomatis tampil paling atas.
+                        {/* Tombol Aksi */}
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <button
+                            onClick={() => setSelectedProduct(product)}
+                            className="py-2.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-900 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Lihat Detail
+                          </button>
+                          <button
+                            onClick={() => setOrderModalProduct(product)}
+                            className="py-2.5 px-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-amber-400 border border-amber-500/40 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5 shadow-md"
+                          >
+                            <MessageCircle className="w-4 h-4 text-emerald-400" />
+                            Pesan Sekarang
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </main>
+      )}
 
-## 10. HASIL AKHIR
+      {/* ====================================================================== */}
+      {/* FOOTER TOKO                                                            */}
+      {/* ====================================================================== */}
+      {view === "catalog" && (
+        <footer className="bg-neutral-950 text-neutral-400 border-t border-amber-500/20 py-10 px-4">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+              <h5 className="text-white font-extrabold tracking-wide">{storeSettings.storeName}</h5>
+              <p className="text-xs mt-1">{storeSettings.address}</p>
+            </div>
+            <div className="text-xs space-y-1">
+              <p className="text-amber-400 font-semibold">WhatsApp Official: {storeSettings.whatsappDisplay || "085126260240"}</p>
+              <p>© {new Date().getFullYear()} {storeSettings.storeName}. All Rights Reserved.</p>
+            </div>
+          </div>
+        </footer>
+      )}
 
-Buat aplikasi yang benar-benar berfungsi, bukan sekadar desain atau tampilan demo.
+      {/* ====================================================================== */}
+      {/* TOMBOL WHATSAPP MENGAMBANG (FLOATING BUTTON)                           */}
+      {/* ====================================================================== */}
+      {view === "catalog" && (
+        <a
+          href={`https://wa.me/${getCleanWaNumber()}?text=${encodeURIComponent("Halo Admin Katalog Jersey Online, saya ingin bertanya seputar pemesanan jersey.")}`}
+          target="_blank"
+          rel="noreferrer"
+          title="Chat Admin via WhatsApp"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3.5 rounded-full shadow-2xl shadow-emerald-900/40 hover:scale-105 transition-all"
+        >
+          <MessageCircle className="w-6 h-6 fill-white text-emerald-600" />
+          <span className="font-bold text-sm hidden sm:inline">Chat Admin WA</span>
+        </a>
+      )}
 
-Pastikan:
-1. Admin bisa login.
-2. Admin bisa mengganti password.
-3. Admin bisa upload, edit, dan menghapus foto.
-4. Produk tersimpan permanen di database.
-5. Pelanggan dapat melihat katalog tanpa login.
-6. Kalkulator DP bekerja otomatis sesuai tabel.
-7. Tombol pemesanan terhubung ke WhatsApp 085126260240.
-8. Pesan WhatsApp otomatis berisi detail pesanan.
-9. Aplikasi bisa diakses melalui link website.
-10. Aplikasi siap digunakan untuk bisnis penjualan jersey.
+      {/* ====================================================================== */}
+      {/* MODAL DETAIL PRODUK                                                    */}
+      {/* ====================================================================== */}
+      {selectedProduct && (
+        <ProductDetailModal
+          product={selectedProduct}
+          onClose={() => {
+            setSelectedProduct(null);
+            const url = new URL(window.location.href);
+            url.searchParams.delete('product');
+            window.history.replaceState({}, '', url);
+          }}
+          onCopyLink={() => handleCopyLink(selectedProduct.id)}
+          onOpenOrderForm={() => {
+            const p = selectedProduct;
+            setSelectedProduct(null);
+            setOrderModalProduct(p);
+          }}
+          onQuickWA={(qty) => openDirectWhatsAppProduct(selectedProduct, qty)}
+        />
+      )}
+
+      {/* ====================================================================== */}
+      {/* MODAL FORM PEMESANAN & KALKULATOR DP TERINTEGRASI WHATSAPP             */}
+      {/* ====================================================================== */}
+      {orderModalProduct && (
+        <OrderFormModal
+          product={orderModalProduct}
+          db={db}
+          appId={appId}
+          showToast={showToast}
+          onClose={() => setOrderModalProduct(null)}
+          onSubmitToWA={(qty, customerInfo) => {
+            openDirectWhatsAppProduct(orderModalProduct, qty, customerInfo);
+            setOrderModalProduct(null);
+          }}
+        />
+      )}
+
+      {/* ====================================================================== */}
+      {/* MODAL KALKULATOR DP MANDIRI                                            */}
+      {/* ====================================================================== */}
+      {showDPCalculatorModal && (
+        <DPCalculatorModal onClose={() => setShowDPCalculatorModal(false)} />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// KOMPONEN KALKULATOR DP INLINE (DI HALAMAN UTAMA)
+// ============================================================================
+function InlineDPCalculator() {
+  const [qty, setQty] = useState(10);
+  const dpResult = calculateDP(qty);
+
+  return (
+    <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-xl border border-amber-500/30 flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-3.5 w-full lg:w-auto">
+        <div className="w-12 h-12 rounded-xl bg-neutral-950 text-amber-400 flex items-center justify-center shrink-0">
+          <Calculator className="w-6 h-6" />
+        </div>
+        <div>
+          <h3 className="font-extrabold text-neutral-900 text-sm sm:text-base">
+            Kalkulator DP Pemesanan Otomatis
+          </h3>
+          <p className="text-xs text-neutral-500">
+            Masukkan jumlah baju untuk melihat nominal DP sesuai ketentuan produksi
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full lg:w-auto">
+        <div className="flex items-center bg-neutral-100 rounded-xl px-3 py-2 border border-neutral-200 w-full sm:w-44">
+          <span className="text-xs text-neutral-500 mr-2">Jumlah:</span>
+          <input
+            type="number"
+            min="1"
+            value={qty}
+            onChange={(e) => setQty(e.target.value)}
+            className="w-full bg-transparent font-extrabold text-neutral-950 outline-none text-sm"
+          />
+          <span className="text-xs font-semibold text-neutral-500 ml-1">Baju</span>
+        </div>
+
+        <div className="bg-neutral-950 text-white px-4 py-2.5 rounded-xl border border-amber-500/40 w-full sm:w-auto min-w-[210px]">
+          <div className="text-[10px] uppercase tracking-wider text-neutral-400">Nominal DP Wajib</div>
+          <div className="text-base sm:text-lg font-black text-amber-400">
+            {dpResult.valid ? dpResult.label : "Minimal 1 Baju"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MODAL KALKULATOR DP LENGKAP + TABEL ATURAN DP
+// ============================================================================
+function DPCalculatorModal({ onClose }) {
+  const [qty, setQty] = useState(10);
+  const dpInfo = calculateDP(qty);
+
+  const rules = [
+    { range: "1 – 3 baju", dp: "Rp50.000" },
+    { range: "4 – 6 baju", dp: "Rp150.000" },
+    { range: "7 – 12 baju", dp: "Rp250.000" },
+    { range: "13 – 24 baju", dp: "Rp300.000" },
+    { range: "25 – 50 baju", dp: "Rp500.000" },
+    { range: "51 – 100 baju", dp: "Rp1.000.000" },
+    { range: "> 100 baju", dp: "Hubungi Admin" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-amber-500/30 animate-in fade-in zoom-in-95 duration-200">
+        <div className="bg-neutral-950 text-white px-6 py-4 flex items-center justify-between border-b border-amber-500/30">
+          <div className="flex items-center gap-2.5">
+            <Calculator className="w-5 h-5 text-amber-400" />
+            <h3 className="font-extrabold text-base sm:text-lg">Kalkulator DP Otomatis</h3>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
+              Masukkan Jumlah Baju yang Dipesan
+            </label>
+            <input
+              type="number"
+              min="1"
+              value={qty}
+              onChange={(e) => setQty(e.target.value)}
+              className="w-full px-4 py-3.5 rounded-xl bg-neutral-100 border-2 border-neutral-200 focus:border-amber-500 focus:bg-white text-xl font-black text-neutral-950 outline-none transition"
+            />
+            {!dpInfo.valid && (
+              <p className="text-xs text-red-600 font-semibold mt-1.5">{dpInfo.message}</p>
+            )}
+          </div>
+
+          <div className="bg-neutral-950 rounded-2xl p-5 text-white border border-amber-500/40">
+            <div className="flex justify-between items-center text-xs text-neutral-400 mb-1">
+              <span>Jumlah Pesanan:</span>
+              <span className="font-bold text-white">{qty || 0} Baju</span>
+            </div>
+            <div className="flex justify-between items-center pt-2 border-t border-neutral-800">
+              <span className="text-sm font-semibold text-neutral-300">DP yang Harus Dibayar:</span>
+              <span className="text-2xl font-black text-amber-400">
+                {dpInfo.valid ? dpInfo.label : "-"}
+              </span>
+            </div>
+            {dpInfo.isOver100 && (
+              <p className="text-xs text-amber-300 mt-2 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/30">
+                {dpInfo.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-2">
+              Tabel Ketentuan DP Resmi
+            </h4>
+            <div className="border border-neutral-200 rounded-xl overflow-hidden text-xs">
+              <div className="grid grid-cols-2 bg-neutral-100 font-bold text-neutral-700 px-4 py-2">
+                <span>Jumlah Baju</span>
+                <span className="text-right">Nominal DP</span>
+              </div>
+              {rules.map((r, idx) => (
+                <div key={idx} className="grid grid-cols-2 px-4 py-2 border-t border-neutral-100">
+                  <span className="text-neutral-700">{r.range}</span>
+                  <span className="text-right font-bold text-neutral-950">{r.dp}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MODAL DETAIL PRODUK (GALERI FOTO, WARNA, UKURAN, KALKULATOR & WA)
+// ============================================================================
+function ProductDetailModal({ product, onClose, onCopyLink, onOpenOrderForm, onQuickWA }) {
+  const images = product.images?.length > 0 
+    ? product.images 
+    : ["https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&w=800&q=80"];
+  const [activeImgIdx, setActiveImgIdx] = useState(0);
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "");
+  const [selectedSize, setSelectedSize] = useState(product.sizes?.[1] || product.sizes?.[0] || "L");
+  const [qty, setQty] = useState(1);
+
+  const dpInfo = calculateDP(qty);
+  const totalPrice = (parseInt(qty, 10) > 0 ? parseInt(qty, 10) : 0) * product.price;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-amber-500/30 my-auto">
+        {/* Header Modal */}
+        <div className="bg-neutral-950 text-white px-5 py-4 flex items-center justify-between border-b border-amber-500/20">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-md bg-amber-500 text-neutral-950 font-black text-xs">
+              {product.code}
+            </span>
+            <span className="text-xs text-neutral-400">{product.category}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onCopyLink}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-amber-400 text-xs font-semibold border border-neutral-800"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Salin Link
+            </button>
+            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Konten 2 Kolom */}
+        <div className="grid grid-cols-1 md:grid-cols-2 max-h-[82vh] overflow-y-auto">
+          {/* Galeri Foto */}
+          <div className="p-5 bg-neutral-100 flex flex-col justify-between space-y-4">
+            <div className="relative aspect-square rounded-2xl overflow-hidden bg-neutral-900 shadow-inner">
+              <img
+                src={images[activeImgIdx]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setActiveImgIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1))}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black"
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setActiveImgIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 text-white hover:bg-black"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Galeri */}
+            {images.length > 1 && (
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
+                {images.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImgIdx(idx)}
+                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition ${
+                      activeImgIdx === idx ? "border-amber-500 scale-105" : "border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={imgUrl} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Informasi Detail & Pemesanan */}
+          <div className="p-6 space-y-5">
+            <div>
+              <h2 className="text-2xl font-black text-neutral-950">{product.name}</h2>
+              <div className="text-2xl font-black text-amber-600 mt-1">
+                {formatRupiah(product.price)} <span className="text-xs font-normal text-neutral-500">/ baju</span>
+              </div>
+            </div>
+
+            <p className="text-sm text-neutral-600 leading-relaxed">
+              {product.description}
+            </p>
+
+            {/* Pilihan Warna */}
+            {product.colors?.length > 0 && (
+              <div>
+                <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">Pilihan Warna</label>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedColor(c)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${
+                        selectedColor === c
+                          ? "bg-neutral-950 text-amber-400 border-amber-500"
+                          : "bg-white text-neutral-700 border-neutral-300 hover:border-neutral-900"
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pilihan Ukuran */}
+            {product.sizes?.length > 0 && (
+              <div>
+                <label className="block text-xs font-bold uppercase text-neutral-500 mb-2">Ukuran Tersedia</label>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSelectedSize(s)}
+                      className={`w-10 h-10 rounded-lg text-xs font-bold border transition ${
+                        selectedSize === s
+                          ? "bg-neutral-950 text-amber-400 border-amber-500"
+                          : "bg-white text-neutral-700 border-neutral-300 hover:border-neutral-900"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Simulasi Jumlah & DP Langsung di Detail */}
+            <div className="bg-neutral-100 p-4 rounded-2xl space-y-2.5 border border-neutral-200">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-neutral-700">Jumlah Pesanan:</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={qty}
+                  onChange={(e) => setQty(e.target.value)}
+                  className="w-24 px-3 py-1.5 rounded-lg bg-white border border-neutral-300 font-extrabold text-right text-sm"
+                />
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-neutral-600">Total Estimasi Harga:</span>
+                <span className="font-extrabold text-neutral-950">{formatRupiah(totalPrice)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs pt-1.5 border-t border-neutral-200">
+                <span className="text-neutral-600 font-semibold">DP Wajib Dibayar:</span>
+                <span className="font-black text-amber-600 text-sm">
+                  {dpInfo.valid ? dpInfo.label : "Minimal 1 baju"}
+                </span>
+              </div>
+            </div>
+
+            {/* Tombol Pemesanan */}
+            <div className="space-y-2.5 pt-2">
+              <button
+                onClick={onOpenOrderForm}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-neutral-950 font-black text-sm shadow-lg hover:brightness-110 transition flex items-center justify-center gap-2"
+              >
+                <ClipboardList className="w-4 h-4" />
+                Isi Form Pemesanan Lengkap
+              </button>
+              <button
+                onClick={() => onQuickWA(Math.max(1, parseInt(qty, 10) || 1))}
+                className="w-full py-3 px-4 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-white font-bold text-sm transition flex items-center justify-center gap-2"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-400" />
+                Pesan Cepat via WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MODAL FORM PEMESANAN (SIMPAN RIWAYAT KE DATABASE + KIRIM KE WHATSAPP)
+// ============================================================================
+function OrderFormModal({ product, db, appId, showToast, onClose, onSubmitToWA }) {
+  const [customerName, setCustomerName] = useState("");
+  const [customerWa, setCustomerWa] = useState("");
+  const [qty, setQty] = useState(10);
+  const [color, setColor] = useState(product.colors?.[0] || "");
+  const [size, setSize] = useState(product.sizes?.[1] || product.sizes?.[0] || "L");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const numericQty = parseInt(qty, 10);
+  const dpInfo = calculateDP(numericQty);
+  const totalHarga = (numericQty > 0 ? numericQty : 0) * product.price;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!customerName.trim() || !customerWa.trim()) {
+      showToast("Mohon lengkapi Nama Pemesan dan Nomor WhatsApp!", "error");
+      return;
+    }
+    if (!dpInfo.valid) {
+      showToast("Jumlah baju minimal 1!", "error");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      // Simpan riwayat pesanan ke Firestore database
+      const ordersRef = collection(db, 'artifacts', appId, 'public', 'data', 'orders');
+      await addDoc(ordersRef, {
+        customerName: customerName.trim(),
+        customerWa: customerWa.trim(),
+        productId: product.id,
+        productName: product.name,
+        productCode: product.code,
+        unitPrice: product.price,
+        quantity: numericQty,
+        totalPrice: totalHarga,
+        dpAmount: dpInfo.amount,
+        dpLabel: dpInfo.label,
+        color,
+        size,
+        notes: notes.trim(),
+        status: "Menunggu DP",
+        createdAt: Date.now()
+      });
+
+      showToast("Pesanan tercatat! Membuka WhatsApp...");
+      onSubmitToWA(numericQty, {
+        customerName: customerName.trim(),
+        customerWa: customerWa.trim(),
+        color,
+        size,
+        notes: notes.trim()
+      });
+    } catch (err) {
+      console.error("Gagal menyimpan pesanan:", err);
+      // Tetap buka WA meski offline
+      onSubmitToWA(numericQty, { customerName, customerWa, color, size, notes });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-xl w-full overflow-hidden shadow-2xl border border-amber-500/30 my-auto">
+        <div className="bg-neutral-950 text-white px-6 py-4 flex items-center justify-between border-b border-amber-500/30">
+          <div>
+            <h3 className="font-extrabold text-lg">Formulir Pemesanan Jersey</h3>
+            <p className="text-xs text-amber-400">{product.name} ({product.code})</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Nama Pemesan *</label>
+              <input
+                type="text"
+                required
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="Contoh: Budi Santoso / FC Garuda"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Nomor WhatsApp Pemesan *</label>
+              <input
+                type="tel"
+                required
+                value={customerWa}
+                onChange={(e) => setCustomerWa(e.target.value)}
+                placeholder="Contoh: 081234567890"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Jumlah Baju *</label>
+              <input
+                type="number"
+                min="1"
+                required
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm font-extrabold outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Warna</label>
+              <input
+                type="text"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Ukuran / Detail Size</label>
+              <input
+                type="text"
+                value={size}
+                onChange={(e) => setSize(e.target.value)}
+                placeholder="Misal: L (5), XL (5)"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Ringkasan Otomatis Harga & DP */}
+          <div className="bg-neutral-950 text-white p-4 rounded-2xl border border-amber-500/40 space-y-2">
+            <div className="flex justify-between text-xs text-neutral-400">
+              <span>Produk ({product.code}):</span>
+              <span className="text-white font-semibold">{product.name}</span>
+            </div>
+            <div className="flex justify-between text-xs text-neutral-400">
+              <span>Harga Satuan:</span>
+              <span className="text-white">{formatRupiah(product.price)}</span>
+            </div>
+            <div className="flex justify-between text-sm font-bold pt-1 border-t border-neutral-800">
+              <span>Total Harga ({numericQty > 0 ? numericQty : 0} baju):</span>
+              <span className="text-white">{formatRupiah(totalHarga)}</span>
+            </div>
+            <div className="flex justify-between items-center pt-1">
+              <span className="text-xs font-bold text-amber-400">Nominal DP Otomatis:</span>
+              <span className="text-lg font-black text-amber-400">
+                {dpInfo.valid ? dpInfo.label : "Minimal 1 baju"}
+              </span>
+            </div>
+            {dpInfo.isOver100 && (
+              <p className="text-[11px] text-amber-300 bg-amber-500/10 p-2 rounded-lg">
+                {dpInfo.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-700 mb-1">Catatan Tambahan (Opsional)</label>
+            <textarea
+              rows="2"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Tulis detail nama punggung, nomor, logo tim, atau request desain..."
+              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={submitting || !dpInfo.valid}
+            className="w-full py-3.5 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-extrabold text-sm shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {submitting ? "Memproses Pesanan..." : "Kirim Pesanan ke WhatsApp"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// HALAMAN LOGIN ADMIN
+// ============================================================================
+function AdminLoginView({ adminCreds, onSuccess, onCancel }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (username.trim() === adminCreds.username && password === adminCreds.password) {
+      onSuccess();
+    } else {
+      setError("Username atau Password salah! Silakan coba lagi.");
+    }
+  };
+
+  return (
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-neutral-100">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-neutral-200 overflow-hidden">
+        <div className="bg-neutral-950 text-white p-6 text-center border-b border-amber-500/30">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto mb-3">
+            <ShieldCheck className="w-7 h-7" />
+          </div>
+          <h2 className="text-xl font-black tracking-wide">LOGIN PANEL ADMIN</h2>
+          <p className="text-xs text-neutral-400 mt-1">Kelola Katalog Jersey, Foto Produk & Pesanan</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="p-6 space-y-4">
+          {error && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-700 mb-1">Username Admin</label>
+            <input
+              type="text"
+              required
+              value={username}
+              onChange={(e) => { setUsername(e.target.value); setError(""); }}
+              placeholder="Masukkan username"
+              className="w-full px-4 py-3 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-700 mb-1">Password</label>
+            <div className="relative">
+              <input
+                type={showPass ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                placeholder="Masukkan password"
+                className="w-full px-4 py-3 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none pr-11"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPass(!showPass)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
+              >
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[11px] text-amber-900">
+            <strong>Info Login Default:</strong> Username: <code className="font-bold">admin</code> | Password: <code className="font-bold">password123</code> (Dapat diubah kapan saja setelah login).
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="w-1/3 py-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold text-sm transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              className="w-2/3 py-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-amber-400 font-extrabold text-sm shadow-lg transition"
+            >
+              Masuk Admin
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// PANEL ADMIN LENGKAP (PRODUK, GALERI FOTO, PESANAN, BANNER & AKUN)
+// ============================================================================
+function AdminPanelView({ products, orders, storeSettings, adminCreds, db, appId, showToast, onLogout }) {
+  const [activeTab, setActiveTab] = useState("products"); // "products" | "orders" | "settings" | "account"
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+
+  // Statistik Dashboard
+  const stats = {
+    totalProducts: products.length,
+    activeProducts: products.filter(p => p.active !== false).length,
+    totalOrders: orders.length,
+    pendingDP: orders.filter(o => o.status === "Menunggu DP").length
+  };
+
+  // Hapus Produk
+  const handleDeleteProduct = async (productId) => {
+    try {
+      await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', productId));
+      showToast("Produk berhasil dihapus secara permanen.");
+    } catch (err) {
+      showToast("Gagal menghapus produk.", "error");
+    }
+  };
+
+  // Toggle Aktif / Nonaktif Produk
+  const handleToggleProductActive = async (product) => {
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), {
+        active: product.active === false ? true : false
+      });
+      showToast(product.active === false ? "Produk diaktifkan kembali." : "Produk dinonaktifkan dari katalog.");
+    } catch (err) {
+      showToast("Gagal mengubah status produk.", "error");
+    }
+  };
+
+  // Ubah Status Pesanan
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'orders', orderId), {
+        status: newStatus
+      });
+      showToast(`Status pesanan diubah menjadi "${newStatus}"`);
+    } catch (err) {
+      showToast("Gagal mengubah status pesanan.", "error");
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Header Admin & Tombol Logout */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-950 text-white p-6 rounded-3xl border border-amber-500/30 shadow-xl">
+        <div>
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Dashboard Manajemen</span>
+          <h2 className="text-2xl font-black mt-0.5">Panel Admin Katalog Jersey</h2>
+        </div>
+        <button
+          onClick={onLogout}
+          className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 font-bold text-xs sm:text-sm transition"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout Admin
+        </button>
+      </div>
+
+      {/* Statistik Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm">
+          <div className="text-xs font-bold text-neutral-500">Total Produk</div>
+          <div className="text-2xl font-black text-neutral-950 mt-1">{stats.totalProducts}</div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm">
+          <div className="text-xs font-bold text-neutral-500">Produk Aktif</div>
+          <div className="text-2xl font-black text-emerald-600 mt-1">{stats.activeProducts}</div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm">
+          <div className="text-xs font-bold text-neutral-500">Total Riwayat Pesanan</div>
+          <div className="text-2xl font-black text-neutral-950 mt-1">{stats.totalOrders}</div>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm">
+          <div className="text-xs font-bold text-neutral-500">Menunggu DP</div>
+          <div className="text-2xl font-black text-amber-600 mt-1">{stats.pendingDP}</div>
+        </div>
+      </div>
+
+      {/* Tab Navigasi Admin */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {[
+          { id: "products", label: "Kelola Produk & Foto", icon: Package },
+          { id: "orders", label: "Daftar Pesanan", icon: ClipboardList },
+          { id: "settings", label: "Banner & WhatsApp Toko", icon: ImageIcon },
+          { id: "account", label: "Username & Password", icon: ShieldCheck }
+        ].map((t) => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap transition ${
+                activeTab === t.id
+                  ? "bg-neutral-950 text-amber-400 shadow-md"
+                  : "bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ==================================================================== */}
+      {/* TAB 1: KELOLA PRODUK & FOTO                                          */}
+      {/* ==================================================================== */}
+      {activeTab === "products" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-extrabold text-neutral-900">Daftar Produk Katalog</h3>
+            <button
+              onClick={() => { setEditingProduct(null); setIsAddingProduct(true); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-neutral-950 font-extrabold text-xs sm:text-sm shadow-md hover:brightness-110 transition"
+            >
+              <Plus className="w-4 h-4" />
+              Tambah Produk Baru
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map((prod) => (
+              <div key={prod.id} className={`bg-white rounded-2xl border p-4 flex flex-col justify-between gap-4 ${prod.active === false ? 'opacity-60 border-red-200' : 'border-neutral-200'}`}>
+                <div className="flex gap-3.5">
+                  <img
+                    src={prod.images?.[0] || "https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&w=400&q=80"}
+                    alt={prod.name}
+                    className="w-20 h-20 rounded-xl object-cover bg-neutral-100 shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded bg-neutral-950 text-amber-400 text-[10px] font-bold">
+                        {prod.code}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${prod.active === false ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {prod.active === false ? "Nonaktif" : "Aktif"}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-neutral-900 truncate mt-1">{prod.name}</h4>
+                    <p className="text-xs text-neutral-500">{prod.category}</p>
+                    <p className="text-sm font-black text-amber-600 mt-1">{formatRupiah(prod.price)}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-neutral-100">
+                  <button
+                    onClick={() => { setEditingProduct(prod); setIsAddingProduct(true); }}
+                    className="py-2 px-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-bold text-xs flex items-center justify-center gap-1"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleToggleProductActive(prod)}
+                    className="py-2 px-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-xs flex items-center justify-center gap-1"
+                  >
+                    {prod.active === false ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    {prod.active === false ? "Aktifkan" : "Nonaktif"}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(prod.id)}
+                    className="py-2 px-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs flex items-center justify-center gap-1"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Hapus
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 2: DAFTAR PESANAN & STATUS                                       */}
+      {/* ==================================================================== */}
+      {activeTab === "orders" && (
+        <div className="bg-white rounded-2xl border border-neutral-200 overflow-hidden">
+          <div className="p-5 border-b border-neutral-200">
+            <h3 className="font-extrabold text-neutral-900">Riwayat & Status Pesanan Pelanggan</h3>
+          </div>
+          {orders.length === 0 ? (
+            <div className="p-10 text-center text-sm text-neutral-500">
+              Belum ada pesanan yang masuk melalui formulir pemesanan.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-neutral-100 text-neutral-600 font-bold">
+                  <tr>
+                    <th className="p-4">Pemesan</th>
+                    <th className="p-4">Produk</th>
+                    <th className="p-4">Qty & Total</th>
+                    <th className="p-4">Nominal DP</th>
+                    <th className="p-4">Status Pesanan</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {orders.map((ord) => (
+                    <tr key={ord.id} className="hover:bg-neutral-50">
+                      <td className="p-4">
+                        <div className="font-bold text-neutral-900">{ord.customerName}</div>
+                        <div className="text-xs text-neutral-500">{ord.customerWa}</div>
+                        {ord.notes && <div className="text-[11px] text-amber-700 mt-1">Catatan: {ord.notes}</div>}
+                      </td>
+                      <td className="p-4">
+                        <div className="font-bold">{ord.productName}</div>
+                        <div className="text-xs text-neutral-500">{ord.productCode} • {ord.color} • {ord.size}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="font-bold">{ord.quantity} Baju</div>
+                        <div className="text-xs text-neutral-500">{formatRupiah(ord.totalPrice)}</div>
+                      </td>
+                      <td className="p-4 font-black text-amber-600">
+                        {ord.dpLabel}
+                      </td>
+                      <td className="p-4">
+                        <select
+                          value={ord.status || "Menunggu DP"}
+                          onChange={(e) => handleUpdateOrderStatus(ord.id, e.target.value)}
+                          className="px-3 py-1.5 rounded-lg border border-neutral-300 bg-white font-bold text-xs outline-none focus:border-amber-500"
+                        >
+                          {ORDER_STATUSES.map(st => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 3: PENGATURAN BANNER PROMOSI & WHATSAPP TOKO                     */}
+      {/* ==================================================================== */}
+      {activeTab === "settings" && (
+        <AdminStoreSettingsForm 
+          storeSettings={storeSettings} 
+          db={db} 
+          appId={appId} 
+          showToast={showToast} 
+        />
+      )}
+
+      {/* ==================================================================== */}
+      {/* TAB 4: UBAH USERNAME & PASSWORD ADMIN                                */}
+      {/* ==================================================================== */}
+      {activeTab === "account" && (
+        <AdminAccountForm 
+          adminCreds={adminCreds} 
+          db={db} 
+          appId={appId} 
+          showToast={showToast} 
+        />
+      )}
+
+      {/* MODAL TAMBAH / EDIT PRODUK & UPLOAD MULTI-FOTO */}
+      {isAddingProduct && (
+        <ProductFormModal
+          product={editingProduct}
+          db={db}
+          appId={appId}
+          showToast={showToast}
+          onClose={() => { setIsAddingProduct(false); setEditingProduct(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// FORM TAMBAH / EDIT PRODUK + UPLOAD MULTIPLE FOTO
+// ============================================================================
+function ProductFormModal({ product, db, appId, showToast, onClose }) {
+  const [name, setName] = useState(product?.name || "");
+  const [code, setCode] = useState(product?.code || "");
+  const [category, setCategory] = useState(product?.category || "Jersey Bola");
+  const [price, setPrice] = useState(product?.price || 150000);
+  const [description, setDescription] = useState(product?.description || "");
+  const [colorsText, setColorsText] = useState(product?.colors?.join(", ") || "Hitam Emas, Putih");
+  const [sizesText, setSizesText] = useState(product?.sizes?.join(", ") || "S, M, L, XL, XXL");
+  const [images, setImages] = useState(product?.images || []);
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Upload beberapa foto sekaligus dari perangkat (HP / Komputer)
+  const handleMultiFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const compressedList = [];
+      for (const file of files) {
+        const base64 = await compressImageToBase64(file);
+        compressedList.push(base64);
+      }
+      setImages((prev) => [...prev, ...compressedList]);
+      showToast(`${compressedList.length} foto berhasil diunggah!`);
+    } catch (err) {
+      showToast("Gagal memproses gambar.", "error");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Tambah foto via URL
+  const handleAddImageUrl = () => {
+    if (!imageUrlInput.trim()) return;
+    setImages((prev) => [...prev, imageUrlInput.trim()]);
+    setImageUrlInput("");
+  };
+
+  // Hapus foto tertentu
+  const handleRemoveImage = (index) => {
+    setImages((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  // Jadikan foto utama (pindah ke index 0)
+  const handleSetMainImage = (index) => {
+    if (index === 0) return;
+    const copy = [...images];
+    const [picked] = copy.splice(index, 1);
+    copy.unshift(picked);
+    setImages(copy);
+    showToast("Foto utama diperbarui.");
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!name.trim() || !code.trim() || !price) {
+      showToast("Nama, Kode, dan Harga produk wajib diisi!", "error");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        name: name.trim(),
+        code: code.trim().toUpperCase(),
+        category,
+        price: Number(price),
+        description: description.trim(),
+        colors: colorsText.split(",").map(s => s.trim()).filter(Boolean),
+        sizes: sizesText.split(",").map(s => s.trim()).filter(Boolean),
+        images: images.length > 0 ? images : ["https://images.unsplash.com/photo-1580087256394-dc596e1c8f4f?auto=format&fit=crop&w=800&q=80"],
+        active: product ? (product.active !== false) : true,
+        createdAt: product?.createdAt || Date.now()
+      };
+
+      if (product?.id) {
+        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'products', product.id), payload);
+        showToast("Perubahan produk tersimpan permanen!");
+      } else {
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'products'), payload);
+        showToast("Produk baru berhasil ditambahkan ke katalog!");
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+      showToast("Gagal menyimpan produk ke database.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-amber-500/30 my-auto">
+        <div className="bg-neutral-950 text-white px-6 py-4 flex items-center justify-between border-b border-amber-500/30">
+          <h3 className="font-extrabold text-lg">
+            {product ? "Edit Produk Jersey" : "Tambah Produk Jersey Baru"}
+          </h3>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSave} className="p-6 space-y-4 max-h-[82vh] overflow-y-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Nama Produk *</label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Contoh: Jersey Bola Pro Edition"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Kode Produk *</label>
+              <input
+                type="text"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="JB-007"
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm font-bold uppercase outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Kategori Produk *</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm font-semibold outline-none"
+              >
+                {CATEGORIES.filter(c => c !== "Semua").map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Harga Satuan (Rp) *</label>
+              <input
+                type="number"
+                min="1000"
+                required
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm font-extrabold outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-neutral-700 mb-1">Deskripsi Produk</label>
+            <textarea
+              rows="3"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Jelaskan bahan kain, jenis sablon/printing, keunggulan jahitan..."
+              className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Pilihan Warna (pisahkan koma)</label>
+              <input
+                type="text"
+                value={colorsText}
+                onChange={(e) => setColorsText(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-neutral-700 mb-1">Pilihan Ukuran (pisahkan koma)</label>
+              <input
+                type="text"
+                value={sizesText}
+                onChange={(e) => setSizesText(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 focus:border-amber-500 focus:bg-white text-sm outline-none"
+              />
+            </div>
+          </div>
+
+          {/* MANAJEMEN FOTO PRODUK (MULTI UPLOAD & GALERI) */}
+          <div className="bg-neutral-50 p-4 rounded-2xl border border-neutral-200 space-y-3">
+            <label className="block text-xs font-extrabold uppercase text-neutral-700">
+              Galeri Foto Produk (Bisa Upload Banyak Foto Sekaligus)
+            </label>
+
+            <div className="flex flex-col sm:flex-row gap-2">
+              <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-neutral-950 hover:bg-neutral-800 text-amber-400 font-bold text-xs cursor-pointer transition">
+                <Upload className="w-4 h-4" />
+                {uploading ? "Mengunggah Foto..." : "Upload Foto dari Perangkat"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleMultiFileUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Alternatif URL Foto */}
+            <div className="flex gap-2">
+              <input
+                type="url"
+                value={imageUrlInput}
+                onChange={(e) => setImageUrlInput(e.target.value)}
+                placeholder="Atau tempel link URL foto di sini..."
+                className="flex-1 px-3 py-2 rounded-xl bg-white border border-neutral-200 text-xs outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleAddImageUrl}
+                className="px-3 py-2 rounded-xl bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold text-xs"
+              >
+                Tambah URL
+              </button>
+            </div>
+
+            {/* Preview Foto yang Sudah Diunggah */}
+            {images.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 pt-2">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-neutral-300 bg-white">
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    {idx === 0 && (
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-amber-500 text-neutral-950 text-[9px] font-black">
+                        UTAMA
+                      </span>
+                    )}
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-1.5 p-1">
+                      {idx !== 0 && (
+                        <button
+                          type="button"
+                          onClick={() => handleSetMainImage(idx)}
+                          className="px-2 py-1 rounded bg-amber-400 text-neutral-950 font-bold text-[10px]"
+                        >
+                          Jadikan Utama
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(idx)}
+                        className="px-2 py-1 rounded bg-red-600 text-white font-bold text-[10px]"
+                      >
+                        Hapus Foto
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold text-sm"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-neutral-950 font-extrabold text-sm shadow-lg hover:brightness-110"
+            >
+              {saving ? "Menyimpan..." : "Simpan Produk Permanen"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// FORM PENGATURAN BANNER PROMOSI & NOMOR WHATSAPP TOKO
+// ============================================================================
+function AdminStoreSettingsForm({ storeSettings, db, appId, showToast }) {
+  const [form, setForm] = useState(storeSettings);
+  const [saving, setSaving] = useState(false);
+
+  const handleBannerImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const base64 = await compressImageToBase64(file);
+      setForm(prev => ({ ...prev, bannerImage: base64 }));
+      showToast("Foto banner berhasil dimuat!");
+    } catch (err) {
+      showToast("Gagal mengunggah gambar banner.", "error");
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      let cleanWa = form.whatsapp.replace(/\D/g, '');
+      if (cleanWa.startsWith('0')) cleanWa = '62' + cleanWa.slice(1);
+      const updated = { ...form, whatsapp: cleanWa };
+
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'storeConfig'), updated);
+      showToast("Pengaturan toko & banner promosi berhasil diperbarui!");
+    } catch (err) {
+      showToast("Gagal menyimpan pengaturan.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSave} className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-5 max-w-3xl">
+      <h3 className="text-lg font-extrabold text-neutral-900">Pengaturan Toko, Banner Promosi & WhatsApp</h3>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-neutral-700 mb-1">Nama Toko / Aplikasi</label>
+          <input
+            type="text"
+            value={form.storeName}
+            onChange={(e) => setForm({ ...form, storeName: e.target.value })}
+            className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm font-bold"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-neutral-700 mb-1">Nomor WhatsApp Toko (Format 628...)</label>
+          <input
+            type="text"
+            value={form.whatsapp}
+            onChange={(e) => setForm({ ...form, whatsapp: e.target.value, whatsappDisplay: e.target.value })}
+            placeholder="6285126260240"
+            className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm font-bold"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-neutral-700 mb-1">Badge Promo Banner</label>
+          <input
+            type="text"
+            value={form.bannerBadge}
+            onChange={(e) => setForm({ ...form, bannerBadge: e.target.value })}
+            className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-neutral-700 mb-1">Judul Utama Banner</label>
+          <input
+            type="text"
+            value={form.bannerTitle}
+            onChange={(e) => setForm({ ...form, bannerTitle: e.target.value })}
+            className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm font-bold"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-neutral-700 mb-1">Subjudul / Deskripsi Banner</label>
+        <textarea
+          rows="2"
+          value={form.bannerSubtitle}
+          onChange={(e) => setForm({ ...form, bannerSubtitle: e.target.value })}
+          className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-neutral-700 mb-1">Background Banner Promosi</label>
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <label className="px-4 py-2.5 rounded-xl bg-neutral-950 text-amber-400 font-bold text-xs cursor-pointer flex items-center gap-2">
+            <Upload className="w-4 h-4" /> Ganti Gambar Banner
+            <input type="file" accept="image/*" onChange={handleBannerImageUpload} className="hidden" />
+          </label>
+          <input
+            type="text"
+            value={form.bannerImage}
+            onChange={(e) => setForm({ ...form, bannerImage: e.target.value })}
+            placeholder="URL gambar banner"
+            className="flex-1 w-full px-3.5 py-2 rounded-xl bg-neutral-100 border border-neutral-200 text-xs"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-600 text-neutral-950 font-extrabold text-sm shadow-md hover:brightness-110"
+      >
+        {saving ? "Menyimpan..." : "Simpan Semua Pengaturan"}
+      </button>
+    </form>
+  );
+}
+
+// ============================================================================
+// FORM UBAH USERNAME & PASSWORD ADMIN
+// ============================================================================
+function AdminAccountForm({ adminCreds, db, appId, showToast }) {
+  const [username, setUsername] = useState(adminCreds.username || "admin");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleUpdateAccount = async (e) => {
+    e.preventDefault();
+    if (!username.trim()) {
+      showToast("Username tidak boleh kosong!", "error");
+      return;
+    }
+    if (newPassword && newPassword !== confirmPassword) {
+      showToast("Konfirmasi password baru tidak cocok!", "error");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'adminAuth'), {
+        username: username.trim(),
+        password: newPassword ? newPassword : adminCreds.password
+      });
+      setNewPassword("");
+      setConfirmPassword("");
+      showToast("Username & Password Admin berhasil diperbarui!");
+    } catch (err) {
+      showToast("Gagal memperbarui akun admin.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleUpdateAccount} className="bg-white rounded-2xl border border-neutral-200 p-6 space-y-4 max-w-lg">
+      <h3 className="text-lg font-extrabold text-neutral-900">Keamanan Akun Admin</h3>
+      <p className="text-xs text-neutral-500">Ubah username atau ganti password login admin kapan saja.</p>
+
+      <div>
+        <label className="block text-xs font-bold text-neutral-700 mb-1">Username Admin</label>
+        <input
+          type="text"
+          required
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm font-bold"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-neutral-700 mb-1">Password Baru (Kosongkan jika tidak diganti)</label>
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="Masukkan password baru"
+          className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-neutral-700 mb-1">Konfirmasi Password Baru</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="Ulangi password baru"
+          className="w-full px-3.5 py-2.5 rounded-xl bg-neutral-100 border border-neutral-200 text-sm"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={saving}
+        className="px-6 py-3 rounded-xl bg-neutral-950 text-amber-400 font-extrabold text-sm shadow-md hover:bg-neutral-800"
+      >
+        {saving ? "Menyimpan..." : "Simpan Kredensial Admin"}
+      </button>
+    </form>
+  );
+}
